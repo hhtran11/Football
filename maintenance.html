@@ -4,15 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Penalty Master - Bảo trì</title>
+  <title>Penalty Master - Bảo Trì Hệ Thống (CR7 SIUUU!)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-1: #07131f;
-      --bg-2: #10324b;
-      --accent: #f1c40f;
-      --accent-2: #e74c3c;
-      --text: #f8fbff;
-      --muted: #aebfd4;
+      --bg-1: #050c14;
+      --bg-2: #0e2438;
+      --accent-gold: #f1c40f;
+      --accent-red: #e74c3c;
+      --accent-blue: #3498db;
+      --text: #ffffff;
+      --muted: #a0b3c6;
     }
 
     * {
@@ -21,78 +23,110 @@
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
       color: var(--text);
-      background: radial-gradient(circle at top, #17486b 0%, var(--bg-1) 45%, #030910 100%);
+      background: radial-gradient(circle at 50% 20%, #153b5c 0%, var(--bg-1) 60%, #02060b 100%);
       min-height: 100vh;
       display: grid;
       place-items: center;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: linear-gradient(120deg, rgba(241, 196, 15, 0.10), transparent 30%, rgba(231, 76, 60, 0.12));
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(241, 196, 15, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(52, 152, 219, 0.12), transparent 40%);
       pointer-events: none;
     }
 
     .maintenance-card {
-      width: min(96vw, 980px);
-      background: rgba(7, 19, 31, 0.78);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-      border-radius: 24px;
-      padding: 28px;
-      backdrop-filter: blur(10px);
+      width: min(96vw, 1040px);
+      background: rgba(8, 21, 36, 0.88);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65);
+      border-radius: 28px;
+      padding: 30px;
+      backdrop-filter: blur(16px);
       position: relative;
       overflow: hidden;
+      margin: 20px 0;
     }
 
     .maintenance-card::after {
       content: '';
       position: absolute;
-      inset: -1px;
+      inset: 0;
       border-radius: inherit;
-      border: 1px solid rgba(241, 196, 15, 0.22);
+      border: 1.5px solid rgba(241, 196, 15, 0.35);
       pointer-events: none;
     }
 
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
     .status-badge {
-      display: inline-block;
-      background: rgba(241, 196, 15, 0.18);
-      color: var(--accent);
-      border: 1px solid rgba(241, 196, 15, 0.3);
-      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.25), rgba(230, 126, 34, 0.25));
+      color: var(--accent-gold);
+      border: 1px solid rgba(241, 196, 15, 0.5);
+      padding: 8px 18px;
       border-radius: 999px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-size: 0.8rem;
-      margin-bottom: 14px;
+      font-size: 0.85rem;
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.2);
+    }
+
+    .status-badge .dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-gold);
+      animation: pulse 1.2s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.4; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.2); }
     }
 
     h1 {
-      font-size: clamp(1.8rem, 3.2vw, 2.8rem);
-      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 900;
+      margin: 0 0 8px;
       line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, #d5e4f3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
       color: var(--muted);
       font-size: 1.05rem;
       margin: 0 0 20px;
-      max-width: 680px;
+      max-width: 780px;
     }
 
     .field-wrap {
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: linear-gradient(180deg, #1d713f 0%, #2da04f 100%);
-      box-shadow: inset 0 -10px 25px rgba(0, 0, 0, 0.2);
-      margin-top: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      background: #091a10;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6), 0 15px 35px rgba(0, 0, 0, 0.4);
+      position: relative;
     }
 
     canvas {
@@ -100,32 +134,72 @@
       width: 100%;
       height: auto;
       aspect-ratio: 16/9;
-      background: linear-gradient(180deg, #288b49 0%, #1f6a3a 100%);
+    }
+
+    .controls-bar {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .btn-action {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action:hover {
+      background: var(--accent-gold);
+      color: #000;
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
     }
 
     .info-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 0.95rem;
+      gap: 12px;
+      margin-top: 20px;
     }
 
     .pill {
-      padding: 8px 12px;
+      padding: 9px 16px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill strong {
+      color: #fff;
     }
 
     @media (max-width: 700px) {
       .maintenance-card {
         padding: 20px;
       }
-
-      .info-row {
-        font-size: 0.9rem;
+      .subtitle {
+        font-size: 0.95rem;
       }
     }
   </style>
@@ -133,131 +207,673 @@
 
 <body>
   <div class="maintenance-card">
-    <div class="status-badge">⚽ Bảo trì hệ thống</div>
-    <h1>Website đang được sửa chữa và nâng cấp</h1>
-    <p class="subtitle">Chúng tôi đang cập nhật nội dung và cải thiện trải nghiệm. Xin vui lòng quay lại sau!</p>
+    <div class="header-bar">
+      <div class="status-badge">
+        <span class="dot"></span>
+        HỆ THỐNG ĐANG BẢO TRÌ
+      </div>
+      <span style="color: var(--accent-gold); font-weight: 800; letter-spacing: 1px;">⚡ PENALTY MASTER ⚽</span>
+    </div>
+
+    <h1>CR7 SIUUU! HỆ THỐNG ĐANG BẢO TRÌ</h1>
+    <p class="subtitle">Penalty Master đang cập nhật giao diện, nâng cấp thêm ngân hàng câu hỏi Python và tối ưu hóa trải nghiệm. Xin vui lòng quay lại sau ít phút!</p>
 
     <div class="field-wrap">
       <canvas id="maintenanceCanvas" width="1200" height="675"></canvas>
+      <div class="controls-bar">
+        <button class="btn-action" onclick="replayAnimation()">
+          🔄 REPLAY SIUUU
+        </button>
+      </div>
     </div>
 
     <div class="info-row">
-      <span class="pill">🛠️ Đang tối ưu nội dung</span>
-      <span class="pill">⏰ 10:37</span>
-      <span class="pill">🌙 6:50</span>
-      <span class="pill">⚡ Sẽ mở lại sớm</span>
-      <span class="pill">🎯 Hỗ trợ học Python tốt hơn</span>
+      <div class="pill">🛠️ Trạng thái: <strong>Đang nâng cấp ngân hàng câu hỏi Python</strong></div>
+      <div class="pill">⚽ Nhân vật: <strong>CR7 (Cristiano Ronaldo #7)</strong></div>
+      <div class="pill">⚡ Động tác: <strong>Chạy đà - Sút Penalty - Nhảy xoay SIUUU!</strong></div>
+      <div class="pill">🎯 Thời gian dự kiến: <strong>Sắp hoàn thành</strong></div>
     </div>
   </div>
+
+  <audio id="siuuAudio" src="music/win.mp3"></audio>
 
   <script>
     const canvas = document.getElementById('maintenanceCanvas');
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
+
+    let cw = 1200;
+    let ch = 675;
+
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      canvas.w = rect.width;
-      canvas.h = rect.height;
+      cw = rect.width;
+      ch = rect.height;
     };
     window.addEventListener('resize', resize);
     resize();
 
-    const onanaImg = new Image();
-    let onanaReady = false;
-    onanaImg.onload = () => {
-      onanaReady = true;
-    };
-    onanaImg.src = 'img/maintain.png';
+    // Sound effect
+    const siuuAudio = document.getElementById('siuuAudio');
 
-    function drawField() {
-      ctx.clearRect(0, 0, canvas.w, canvas.h);
+    // Animation state
+    let animTime = 0;
+    let lastTimestamp = performance.now();
+    let hasPlayedAudio = false;
 
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.h);
-      grad.addColorStop(0, '#1c7f42');
-      grad.addColorStop(1, '#0f5d2f');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.w, canvas.h);
+    // Particles & FX
+    let particles = [];
+    let shockwaves = [];
+    let netBulge = 0;
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(40, 50, canvas.w - 80, canvas.h - 100);
-      ctx.beginPath();
-      ctx.arc(canvas.w / 2, canvas.h / 2 + 20, 70, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(canvas.w / 2, 50);
-      ctx.lineTo(canvas.w / 2, canvas.h - 50);
-      ctx.stroke();
-
+    function addGoalParticles(x, y) {
+      for (let i = 0; i < 45; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 3 + Math.random() * 9;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          color: Math.random() > 0.4 ? '#f1c40f' : '#ffffff',
+          size: 3 + Math.random() * 6,
+          alpha: 1,
+          life: 1
+        });
+      }
     }
 
-    function drawOnana(x, y) {
-      const t = performance.now() / 1000;
-      const bob = Math.sin(t * 2.4) * 4;
-      const armSwing = Math.sin(t * 2.2) * 0.16;
+    function addLandingShockwave(x, y) {
+      shockwaves.push({ x: x, y: y, radius: 10, maxRadius: 180, alpha: 1 });
+      for (let i = 0; i < 60; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 4 + Math.random() * 12;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed * 0.4 - 1,
+          color: Math.random() > 0.3 ? '#f1c40f' : '#e74c3c',
+          size: 4 + Math.random() * 7,
+          alpha: 1,
+          life: 1
+        });
+      }
+    }
 
+    function replayAnimation() {
+      animTime = 0;
+      hasPlayedAudio = false;
+      particles = [];
+      shockwaves = [];
+      netBulge = 0;
+      if (siuuAudio) {
+        siuuAudio.currentTime = 0;
+        siuuAudio.play().catch(() => {});
+      }
+    }
+
+    // DRAW STADIUM & FIELD
+    function drawStadium() {
+      // Grass gradient background
+      const grad = ctx.createLinearGradient(0, 0, 0, ch);
+      grad.addColorStop(0, '#113b20');
+      grad.addColorStop(0.45, '#1b5e34');
+      grad.addColorStop(1, '#0b3019');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Stadium lights background glow
       ctx.save();
-      ctx.translate(x, y + bob);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.beginPath();
+      ctx.arc(cw * 0.2, -50, 260, 0, Math.PI * 2);
+      ctx.arc(cw * 0.8, -50, 260, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
-      if (onanaReady && onanaImg.naturalWidth) {
-        const imgW = Math.min(640, canvas.w * 0.54);
-        const imgH = imgW * (onanaImg.naturalHeight / onanaImg.naturalWidth);
-        ctx.drawImage(onanaImg, -imgW / 2, -imgH, imgW, imgH);
-      } else {
-        ctx.strokeStyle = '#17263a';
-        ctx.lineWidth = 8;
-        ctx.lineCap = 'round';
+      // Grass stripes
+      const stripeWidth = cw / 12;
+      for (let i = 0; i < 12; i++) {
+        if (i % 2 === 0) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+          ctx.fillRect(i * stripeWidth, 0, stripeWidth, ch);
+        }
+      }
+
+      // Field Lines
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
+      ctx.lineWidth = 3;
+
+      // Penalty box
+      ctx.strokeRect(cw * 0.08, ch * 0.22, cw * 0.84, ch * 0.7);
+
+      // Goal post on the right
+      const goalX = cw * 0.82;
+      const goalY = ch * 0.26;
+      const goalW = cw * 0.12;
+      const goalH = ch * 0.36;
+
+      // Net mesh with impact bulge deformation
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.09)';
+      ctx.fillRect(goalX, goalY, goalW, goalH);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 1.2;
+
+      for (let gx = goalX; gx <= goalX + goalW; gx += 12) {
         ctx.beginPath();
-        ctx.moveTo(-10, 92);
-        ctx.lineTo(-18, 135);
+        const offsetX = (gx > goalX + goalW * 0.4) ? netBulge * 15 : 0;
+        ctx.moveTo(gx + offsetX, goalY);
+        ctx.lineTo(gx + offsetX, goalY + goalH);
         ctx.stroke();
+      }
+      for (let gy = goalY; gy <= goalY + goalH; gy += 12) {
         ctx.beginPath();
-        ctx.moveTo(10, 92);
-        ctx.lineTo(24, 130);
+        ctx.moveTo(goalX, gy);
+        ctx.lineTo(goalX + goalW + netBulge * 15, gy);
         ctx.stroke();
-        ctx.fillStyle = '#14233b';
-        ctx.fillRect(-18, 28, 36, 56);
+      }
+      ctx.restore();
+
+      // Goal Frame (Posts & Crossbar)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 7;
+      ctx.strokeRect(goalX, goalY, goalW, goalH);
+
+      // Penalty spot dot
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cw * 0.35, ch * 0.68, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // REALISTIC ANATOMICAL HUMANOID CR7 RENDERER
+    function drawCR7HumanoidRealistic(x, y, scale, pose, param = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      // Palette
+      const skin = '#e2a374';
+      const skinShadow = '#c28356';
+      const hair = '#1a1614';
+      const kitWhite = '#ffffff';
+      const kitGold = '#f1c40f';
+      const shortsColor = '#ffffff';
+      const socksColor = '#ffffff';
+      const bootColor = '#e74c3c'; // Red Nike boots
+
+      // Shadow on ground
+      if (pose !== 'jump') {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
         ctx.beginPath();
-        ctx.arc(0, 8, 16, 0, Math.PI * 2);
-        ctx.fillStyle = '#f2ccb0';
+        ctx.ellipse(0, 16, 42, 11, 0, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      ctx.translate(240, -110 + armSwing * 12);
-      ctx.rotate(-0.12 + armSwing * 0.08);
-      ctx.fillStyle = '#e74c3c';
-      ctx.fillRect(0, -36, 150, 72);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(0, -36, 150, 72);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '700 20px Segoe UI';
-      ctx.textAlign = 'center';
-      ctx.fillText('BẢO TRÌ', 75, 2);
-      ctx.textAlign = 'left';
+      // HELPER: Draw Limb Bone (Tapered segment with rounded joint)
+      function drawBone(x1, y1, x2, y2, w1, w2, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = Math.min(w1, w2);
+        ctx.lineCap = 'round';
+
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const perp = angle + Math.PI / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x1 + Math.cos(perp) * (w1 / 2), y1 + Math.sin(perp) * (w1 / 2));
+        ctx.lineTo(x2 + Math.cos(perp) * (w2 / 2), y2 + Math.sin(perp) * (w2 / 2));
+        ctx.lineTo(x2 - Math.cos(perp) * (w2 / 2), y2 - Math.sin(perp) * (w2 / 2));
+        ctx.lineTo(x1 - Math.cos(perp) * (w1 / 2), y1 - Math.sin(perp) * (w1 / 2));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath(); ctx.arc(x1, y1, w1 / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x2, y2, w2 / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // HELPER: Draw CR7 Head
+      function drawHead(hx, hy, headAngle = 0, openMouth = false) {
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(headAngle);
+
+        // Head Base / Jawline
+        ctx.fillStyle = skin;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 14, 17, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ear
+        ctx.fillStyle = skinShadow;
+        ctx.beginPath(); ctx.arc(-13, 0, 4, 0, Math.PI * 2); ctx.fill();
+
+        // Hair (Signature CR7 Pompadour Fade)
+        ctx.fillStyle = hair;
+        ctx.beginPath();
+        ctx.ellipse(0, -7, 15, 12, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(-14, -14, 28, 9);
+        // Razor slash fade detail
+        ctx.strokeStyle = '#e2a374';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-10, -5); ctx.lineTo(-4, -10); ctx.stroke();
+
+        // Eyes & Brows
+        ctx.fillStyle = '#222';
+        ctx.fillRect(2, -4, 4, 2); // Eye
+        ctx.fillStyle = hair;
+        ctx.fillRect(0, -8, 8, 2); // Sharp eyebrow
+
+        // Shouting Mouth for SIUUU
+        if (openMouth) {
+          ctx.fillStyle = '#600';
+          ctx.beginPath(); ctx.ellipse(4, 5, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(2, 0, 4, 2); // Teeth
+        }
+
+        ctx.restore();
+      }
+
+      // --- POSES ---
+
+      if (pose === 'run') {
+        // --- REALISTIC RUNNING CYCLING ---
+        const t = animTime * 14;
+        const stride = Math.sin(t);
+        const bob = Math.abs(Math.sin(t * 2)) * 6; // Natural running bounce
+
+        const bodyTilt = -0.15; // Lean forward
+        ctx.translate(0, -bob);
+        ctx.rotate(bodyTilt);
+
+        // Left Leg (Back stroke)
+        const lHipX = -6, lHipY = -35;
+        const lKneeX = lHipX + Math.sin(-stride) * 22;
+        const lKneeY = lHipY + Math.cos(-stride) * 24;
+        const lAnkleX = lKneeX - Math.sin(-stride + 0.6) * 20;
+        const lAnkleY = lKneeY + Math.cos(-stride + 0.6) * 20;
+
+        drawBone(lHipX, lHipY, lKneeX, lKneeY, 14, 11, shortsColor);
+        drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 11, 8, socksColor);
+        // Boot
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(lAnkleX - 4, lAnkleY + 4, 10, 5, -0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Right Leg (Forward stroke)
+        const rHipX = 6, rHipY = -35;
+        const rKneeX = rHipX + Math.sin(stride) * 22;
+        const rKneeY = rHipY + Math.cos(stride) * 24;
+        const rAnkleX = rKneeX + Math.sin(stride + 0.3) * 20;
+        const rAnkleY = rKneeY + Math.cos(stride + 0.3) * 20;
+
+        drawBone(rHipX, rHipY, rKneeX, rKneeY, 14, 11, shortsColor);
+        drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 11, 8, socksColor);
+        // Boot
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(rAnkleX + 4, rAnkleY + 4, 10, 5, 0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Torso / Jersey
+        ctx.fillStyle = kitWhite;
+        ctx.beginPath();
+        ctx.moveTo(-16, -75); ctx.lineTo(16, -75);
+        ctx.lineTo(12, -35); ctx.lineTo(-12, -35);
+        ctx.closePath(); ctx.fill();
+
+        // Gold collar & #7
+        ctx.fillStyle = kitGold;
+        ctx.fillRect(-14, -75, 28, 5);
+        ctx.font = '900 20px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('7', 0, -48);
+
+        // Arms (Counter-swinging)
+        const armSwing = Math.sin(t);
+        // Left Arm (Swinging forward)
+        drawBone(-16, -70, -26 + armSwing * 16, -45, 9, 7, skin);
+        // Right Arm (Swinging back)
+        drawBone(16, -70, 26 - armSwing * 16, -45, 9, 7, skin);
+
+        // Head
+        drawHead(0, -90, 0.05);
+
+      } else if (pose === 'kick') {
+        // --- POWERFUL PENALTY KICK FOLLOW THROUGH ---
+        const kickProg = Math.min(1, param);
+        const bodyTilt = 0.2; // Tilt back on powerful kick
+        ctx.rotate(bodyTilt);
+
+        // Left Leg (Plant leg - firm on ground)
+        const lHipX = -8, lHipY = -35;
+        const lKneeX = -18, lKneeY = -10;
+        const lAnkleX = -20, lAnkleY = 15;
+        drawBone(lHipX, lHipY, lKneeX, lKneeY, 14, 11, shortsColor);
+        drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 11, 8, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(lAnkleX - 4, lAnkleY + 4, 11, 6, -0.3, 0, Math.PI * 2); ctx.fill();
+
+        // Right Leg (Whipping Kicking Leg follow through high up)
+        const rHipX = 6, rHipY = -35;
+        const kickAngle = -0.4 - kickProg * 1.2; // High sweeping kick arc
+        const rKneeX = rHipX + Math.cos(kickAngle) * 28;
+        const rKneeY = rHipY + Math.sin(kickAngle) * 28;
+        const rAnkleX = rKneeX + Math.cos(kickAngle + 0.3) * 26;
+        const rAnkleY = rKneeY + Math.sin(kickAngle + 0.3) * 26;
+
+        drawBone(rHipX, rHipY, rKneeX, rKneeY, 14, 11, shortsColor);
+        drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 11, 8, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(rAnkleX + 6, rAnkleY, 12, 6, kickAngle, 0, Math.PI * 2); ctx.fill();
+
+        // Torso / Jersey
+        ctx.fillStyle = kitWhite;
+        ctx.beginPath();
+        ctx.moveTo(-16, -75); ctx.lineTo(16, -75);
+        ctx.lineTo(12, -35); ctx.lineTo(-12, -35);
+        ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = kitGold;
+        ctx.font = '900 20px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('7', 0, -48);
+
+        // Arms extended wide for counterbalance
+        drawBone(-16, -70, -42, -60, 9, 7, skin);
+        drawBone(16, -70, 42, -50, 9, 7, skin);
+
+        // Head looking at target
+        drawHead(4, -90, -0.15);
+
+      } else if (pose === 'jump') {
+        // --- HIGH JUMP & MID-AIR SPIN ---
+        const spinAngle = param;
+        const scaleX = Math.cos(spinAngle); // 3D spin effect!
+
+        ctx.scale(scaleX, 1);
+
+        // Legs tucked in air
+        drawBone(-10, -35, -15, -10, 13, 10, shortsColor);
+        drawBone(-15, -10, -18, 12, 10, 8, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(-18, 16, 9, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+        drawBone(10, -35, 15, -10, 13, 10, shortsColor);
+        drawBone(15, -10, 18, 12, 10, 8, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(18, 16, 9, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Torso
+        ctx.fillStyle = kitWhite;
+        ctx.fillRect(-16, -75, 32, 42);
+        ctx.fillStyle = kitGold;
+        ctx.font = '900 20px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('7', 0, -50);
+
+        // Arms raised overhead ready to swing down
+        drawBone(-16, -70, -28, -105, 9, 7, skin);
+        drawBone(16, -70, 28, -105, 9, 7, skin);
+
+        // Head
+        drawHead(0, -92, 0);
+
+      } else if (pose === 'siuu') {
+        // --- THE ICONIC SIUUU LANDING STANCE ---
+        // Stance wide, knees bent low into power pose
+        const lHipX = -10, lHipY = -35;
+        const lKneeX = -28, lKneeY = -12;
+        const lAnkleX = -32, lAnkleY = 16;
+
+        drawBone(lHipX, lHipY, lKneeX, lKneeY, 15, 12, shortsColor);
+        drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 12, 9, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(lAnkleX - 6, lAnkleY + 3, 14, 7, -0.2, 0, Math.PI * 2); ctx.fill();
+
+        const rHipX = 10, rHipY = -35;
+        const rKneeX = 28, rKneeY = -12;
+        const rAnkleX = 32, rAnkleY = 16;
+
+        drawBone(rHipX, rHipY, rKneeX, rKneeY, 15, 12, shortsColor);
+        drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 12, 9, socksColor);
+        ctx.fillStyle = bootColor;
+        ctx.beginPath(); ctx.ellipse(rAnkleX + 6, rAnkleY + 3, 14, 7, 0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Shorts
+        ctx.fillStyle = shortsColor;
+        ctx.fillRect(-22, -42, 44, 20);
+
+        // Torso (Arched chest, powerful muscles, gold #7)
+        ctx.fillStyle = kitWhite;
+        ctx.beginPath();
+        ctx.moveTo(-18, -82); ctx.lineTo(18, -82);
+        ctx.lineTo(14, -38); ctx.lineTo(-14, -38);
+        ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = kitGold;
+        ctx.font = '900 22px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('7', 0, -52);
+
+        // Arms thrown wide backwards & downwards (Signature SIUUU pose!)
+        drawBone(-16, -76, -50, -32, 10, 8, skin);
+        drawBone(16, -76, 50, -32, 10, 8, skin);
+
+        // Clenched fists
+        ctx.fillStyle = skin;
+        ctx.beginPath(); ctx.arc(-52, -30, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(52, -30, 6, 0, Math.PI * 2); ctx.fill();
+
+        // Head thrown back shouting SIUUU!
+        drawHead(0, -98, -0.12, true);
+      }
 
       ctx.restore();
     }
 
-    function animate() {
-      drawField();
-      drawOnana(canvas.w * 0.5, canvas.h * 0.72);
+    // MAIN ANIMATION LOOP
+    function animate(now) {
+      const delta = (now - lastTimestamp) / 1000;
+      lastTimestamp = now;
 
-      ctx.save();
-      ctx.font = '700 32px Segoe UI';
-      ctx.fillStyle = 'rgba(255,255,255,0.97)';
-      ctx.font = '600 18px Segoe UI';
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      // ctx.fillText('Sắp quay lại với những bài tập Python mới!', 50, 108);
-      ctx.restore();
+      animTime += delta;
+      const cycle = animTime % 9; // 9-second loop cycle
+
+      drawStadium();
+
+      // Update & Draw Shockwaves
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += delta * 340;
+        sw.alpha -= delta * 1.4;
+        if (sw.alpha <= 0) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.strokeStyle = `rgba(241, 196, 15, ${sw.alpha})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(sw.x, sw.y, sw.radius, sw.radius * 0.35, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Update & Draw Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.22; // Gravity
+        p.alpha -= delta * 1.1;
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Net Bulge recovery
+      if (netBulge > 0) {
+        netBulge = Math.max(0, netBulge - delta * 2);
+      }
+
+      // --- ANIMATION TIMELINE STAGES ---
+
+      if (cycle < 2.2) {
+        // STAGE 1: RUN UP & POWERFUL PENALTY KICK
+        const progress = cycle / 2.2;
+        const cr7X = cw * 0.14 + progress * (cw * 0.22);
+        const cr7Y = ch * 0.68;
+
+        let ballX = cw * 0.35;
+        let ballY = ch * 0.68;
+        let ballRot = cycle * 12;
+
+        if (progress < 0.82) {
+          drawCR7HumanoidRealistic(cr7X, cr7Y, 1.15, 'run');
+        } else {
+          // Kick phase
+          const kickProg = (progress - 0.82) / 0.18;
+          drawCR7HumanoidRealistic(cr7X + 12, cr7Y, 1.15, 'kick', kickProg);
+
+          // Ball rocket shot towards goal top corner!
+          const ballFlyProg = kickProg;
+          ballX = cw * 0.35 + ballFlyProg * (cw * 0.49);
+          ballY = ch * 0.68 - ballFlyProg * (ch * 0.35);
+          ballRot = cycle * 35;
+
+          if (ballFlyProg >= 0.9 && particles.length === 0) {
+            netBulge = 1;
+            addGoalParticles(cw * 0.84, ch * 0.33);
+          }
+        }
+
+        // Draw Ball & Speed Motion Trail
+        ctx.save();
+        if (progress >= 0.82) {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 14;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(cw * 0.35, ch * 0.68);
+          ctx.lineTo(ballX, ballY);
+          ctx.stroke();
+        }
+
+        ctx.translate(ballX, ballY);
+        ctx.rotate(ballRot);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#111111'; ctx.lineWidth = 2.5; ctx.stroke();
+        // Ball Pentagon Pattern
+        ctx.fillStyle = '#111111';
+        ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+      } else if (cycle < 4.0) {
+        // STAGE 2: RUN TO CENTER & JUMP 360 SPIN
+        const stageProgress = (cycle - 2.2) / 1.8;
+        const cr7X = cw * 0.36 + stageProgress * (cw * 0.14);
+
+        if (stageProgress < 0.28) {
+          drawCR7HumanoidRealistic(cr7X, ch * 0.68, 1.22, 'run');
+        } else {
+          const jumpProg = (stageProgress - 0.28) / 0.72;
+          const jumpY = ch * 0.68 - Math.sin(jumpProg * Math.PI) * 170;
+          const spinAngle = jumpProg * Math.PI * 2; // Full 360 mid-air spin!
+
+          drawCR7HumanoidRealistic(cr7X, jumpY, 1.28, 'jump', spinAngle);
+
+          // Landing moment shockwave & audio
+          if (jumpProg >= 0.94 && shockwaves.length === 0) {
+            addLandingShockwave(cw * 0.5, ch * 0.68);
+            if (!hasPlayedAudio) {
+              hasPlayedAudio = true;
+              if (siuuAudio) {
+                siuuAudio.currentTime = 0;
+                siuuAudio.play().catch(() => {});
+              }
+            }
+          }
+        }
+
+      } else {
+        // STAGE 3: ICONIC SIUUU STANCE & REVEAL "BẢO TRÌ" BANNER
+        const cr7X = cw * 0.5;
+        const cr7Y = ch * 0.68;
+
+        if (shockwaves.length === 0 && cycle < 4.4) {
+          addLandingShockwave(cr7X, cr7Y);
+        }
+
+        drawCR7HumanoidRealistic(cr7X, cr7Y, 1.35, 'siuu');
+
+        // GOLDEN "SIUUU!" BURST TEXT ABOVE CR7
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.font = '900 68px Outfit, sans-serif';
+
+        ctx.shadowColor = '#f1c40f';
+        ctx.shadowBlur = 30;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 4;
+        ctx.strokeText('SIUUU! ⚽', cr7X, ch * 0.3);
+        ctx.fillText('SIUUU! ⚽', cr7X, ch * 0.3);
+        ctx.restore();
+
+        // BANNER "BẢO TRÌ HỆ THỐNG" SIGN
+        const bannerProg = Math.min(1, (cycle - 4.0) / 0.7);
+        const bannerY = -120 + bannerProg * (ch * 0.17 + 120);
+
+        ctx.save();
+        ctx.translate(cw * 0.5, bannerY);
+
+        ctx.fillStyle = 'rgba(7, 19, 31, 0.94)';
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 4.5;
+        ctx.shadowColor = 'rgba(241, 196, 15, 0.55)';
+        ctx.shadowBlur = 35;
+
+        ctx.beginPath();
+        ctx.roundRect(-250, -45, 500, 90, 22);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = '900 38px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🛠️ BẢO TRÌ HỆ THỐNG', 0, 0);
+
+        ctx.fillStyle = '#f1c40f';
+        ctx.font = '700 16px Outfit, sans-serif';
+        ctx.fillText('PENALTY MASTER SẮP QUAY TRỞ LẠI!', 0, 26);
+
+        ctx.restore();
+      }
 
       requestAnimationFrame(animate);
     }
 
-    animate();
+    requestAnimationFrame(animate);
   </script>
 </body>
 
