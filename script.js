@@ -2010,7 +2010,11 @@ function showRedEnvelopes() {
         { name: "5.000 VND", icon: "💵" },
         { name: "Ra chơi sớm 5 phút", icon: "🔔" },
         { name: "Chúc bạn may mắn lần sau", icon: "🍀" },
-        { name: "Chúc bạn may mắn lần sau", icon: "🍀" }
+        { name: "Chúc bạn may mắn lần sau", icon: "🍀" },
+        { name: "Chúc bạn may mắn lần sau", icon: "🍀" },
+        { name: "Chúc bạn may mắn lần sau", icon: "🍀" },
+        { name: "100.000 VND", icon: "💰" },
+        { name: "200.000 VND", icon: "🧧" }
     ];
     prizes.sort(() => Math.random() - 0.5);
     prizes.forEach((prize, index) => {
