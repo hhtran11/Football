@@ -1116,36 +1116,39 @@ body.game-active #gameContainer {
 
 .char-options {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
     justify-content: center;
 }
 
 .char-card {
     background: #fff;
     border: 3px solid #eee;
-    padding: 10px;
-    border-radius: 15px;
+    padding: 8px 4px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .char-face {
-    width: 54px;
-    height: 54px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #eee;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: block;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
 .char-label {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 800;
     color: #555;
     text-align: center;
@@ -1157,24 +1160,26 @@ body.game-active #gameContainer {
 
 .char-card.active .char-face {
     border-color: #3498db;
-    transform: scale(1.1);
+    transform: scale(1.08);
     box-shadow: 0 0 12px rgba(52, 152, 219, 0.45);
 }
 
 .char-card:hover .char-face {
-    transform: scale(1.08);
+    transform: scale(1.06);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
+    .char-options {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+}
+
+@media (max-width: 420px) {
     .char-options {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-    }
-
-    .char-avatar {
-        width: 40px;
-        height: 40px;
+        gap: 6px;
     }
 }
 
@@ -1192,7 +1197,7 @@ body.game-active #gameContainer {
 
 .club-options {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     justify-content: center;
 }
@@ -1200,27 +1205,27 @@ body.game-active #gameContainer {
 .club-card {
     background: #fff;
     border: 3px solid #eee;
-    padding: 8px 6px;
+    padding: 8px 4px;
     border-radius: 14px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
 }
 
 .club-card:hover {
-    transform: translateY(-6px) scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
 }
 
 .club-card.active {
     border-color: #3498db;
     background: rgba(52, 152, 219, 0.06);
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25), 0 8px 20px rgba(52, 152, 219, 0.2);
-    transform: translateY(-4px);
+    transform: translateY(-3px);
 }
 
 .club-name {
@@ -1234,14 +1239,15 @@ body.game-active #gameContainer {
 }
 
 .club-logo {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
     border-radius: 6px;
     position: relative;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
     .club-options {
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
@@ -1254,6 +1260,13 @@ body.game-active #gameContainer {
 
     .club-name {
         font-size: 0.55rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .club-options {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
     }
 }
 

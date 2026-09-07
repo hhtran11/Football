@@ -68,7 +68,7 @@
                         </div>
                         <div class="rule-item" style="border-left: 4px solid #e74c3c;">
                             <span class="rule-icon">⚠️</span>
-                            <p><b>Phạt -1 tim ❤️:</b> Hết giờ suy nghĩ hoặc chuyển tab / rời game!</p>
+                            <p><b>Phạt -1 tim ❤️:</b> Chuyển tab / rời game / vi phạm gian lận!</p>
                         </div>
                     </div>
                 </div>
@@ -145,6 +145,22 @@
                             <span class="char-label">Yamal</span>
                         </div>
                         <div class="char-card" onclick="selectChar(5)" id="char5">
+                            <img class="char-face" src="img/lukaku.jpg" alt="Lukaku">
+                            <span class="char-label">Lukaku</span>
+                        </div>
+                        <div class="char-card" onclick="selectChar(6)" id="char6">
+                            <img class="char-face" src="img/vvd.jpg" alt="Van Dijk">
+                            <span class="char-label">Van Dijk</span>
+                        </div>
+                        <div class="char-card" onclick="selectChar(7)" id="char7">
+                            <img class="char-face" src="img/speed.jpg" alt="Speed">
+                            <span class="char-label">Speed</span>
+                        </div>
+                        <div class="char-card" onclick="selectChar(8)" id="char8">
+                            <img class="char-face" src="img/xuanson.png" alt="Xuân Son">
+                            <span class="char-label">Xuân Son</span>
+                        </div>
+                        <div class="char-card" onclick="selectChar(9)" id="char9">
                             <img class="char-face" src="img/face_mixi2.jpg" alt="Mixi">
                             <span class="char-label">Độ Mixi</span>
                         </div>
@@ -166,6 +182,10 @@
                             <img src="img/liver.webp" class="club-logo" alt="Liverpool">
                             <span class="club-name">Liverpool</span>
                         </div>
+                        <div class="club-card" id="club-mancity" onclick="selectClub('mancity', this)">
+                            <img src="img/mc.png" class="club-logo" alt="Man City">
+                            <span class="club-name">Man City</span>
+                        </div>
                         <div class="club-card" id="club-real" onclick="selectClub('real', this)">
                             <img src="img/real.webp" class="club-logo" alt="Real Madrid">
                             <span class="club-name">Real Madrid</span>
@@ -173,6 +193,10 @@
                         <div class="club-card" id="club-barca" onclick="selectClub('barca', this)">
                             <img src="img/barca.webp" class="club-logo" alt="Barcelona">
                             <span class="club-name">Barcelona</span>
+                        </div>
+                        <div class="club-card" id="club-haiphong" onclick="selectClub('haiphong', this)">
+                            <img src="img/hpfc.png" class="club-logo" alt="Hải Phòng">
+                            <span class="club-name">Hải Phòng</span>
                         </div>
                         <div class="club-card" id="club-juventus" onclick="selectClub('juventus', this)">
                             <img src="img/juve.png" class="club-logo" alt="Juventus">
@@ -231,7 +255,7 @@
                 <li style="color:#e67e22; font-weight:700;">☄️ Combo 3 câu đúng: <b>POWERSHOT (x2)</b></li>
                 <li
                     style="color:#d35400; font-weight:700; border-top: 1px dashed rgba(0,0,0,0.15); padding-top: 5px; margin-top: 5px;">
-                    ⏱️ Hết giờ / Chuyển tab: <b>TRỪ 1 TIM ❤️</b></li>
+                    ⏱️ Hết giờ: <b>MẤT LƯỢT</b> | Chuyển tab: <b>TRỪ 1 TIM ❤️</b></li>
             </ul>
         </div>
         <h1>PENALTY MASTER ⚽</h1>
@@ -293,7 +317,8 @@
                         <div id="callMsg" style="font-weight: 700; color: #e74c3c;">Chọn người bạn muốn gọi</div>
                         <div id="callResult"></div>
                         <button id="startCallBtn" onclick="confirmCall()"
-                            style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">📞 BẮT ĐẦU GỌI</button>
+                            style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">📞 BẮT ĐẦU
+                            GỌI</button>
                         <button id="closeCallBtn" onclick="closeModal('callModal')"
                             style="display:none; background: linear-gradient(135deg, #27ae60, #2ecc71); margin-top: 15px; padding: 12px 25px; border-radius: 25px; font-weight: 800; font-size: 1rem; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
                             ⚽ ĐÃ HIỂU, VÀO SÚT PEN!
@@ -312,6 +337,10 @@
                     <label class="radio-label">
                         <input type="radio" name="wisePerson" value="TAN" checked onchange="updateWisePreview()">
                         <span>🧙 Bác Trương Anh Ngọc</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="wisePerson" value="truong_con" onchange="updateWisePreview()">
+                        <span>🦅 Bác Trường con Nam Định</span>
                     </label>
                     <label class="radio-label">
                         <input type="radio" name="wisePerson" value="lukaku" onchange="updateWisePreview()">
@@ -335,7 +364,8 @@
                         <div id="wiseMsg" style="font-weight: 700; color: #3498db;">Chọn nhà thông thái để hỏi</div>
                         <div id="wiseResult" style="font-size: 1.1rem; color: #2c3e50; margin: 15px 0;"></div>
                         <button id="startWiseBtn" onclick="confirmWise()"
-                            style="background: linear-gradient(135deg, #3498db, #2980b9); margin-top: 10px;">🧙 XIN TƯ VẤN</button>
+                            style="background: linear-gradient(135deg, #3498db, #2980b9); margin-top: 10px;">🧙 XIN TƯ
+                            VẤN</button>
                         <button id="closeWiseBtn" onclick="closeModal('wiseModal')"
                             style="display:none; background: linear-gradient(135deg, #27ae60, #2ecc71); margin-top: 15px; padding: 12px 25px; border-radius: 25px; font-weight: 800; font-size: 1rem; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
                             ⚽ ĐÃ HIỂU, VÀO SÚT PEN!
@@ -420,6 +450,7 @@
     <audio id="callAudio_messi" src=""></audio>
 
     <audio id="wiseAudio" src="music/wise.mp3"></audio>
+    <audio id="wiseAudio_truongcon" src="music/truongconnd.mp3"></audio>
     <audio id="wiseAudio_lukaku" src=""></audio>
     <audio id="wiseAudio_cr7" src="music/win.mp3"></audio>
 

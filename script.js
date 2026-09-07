@@ -169,32 +169,40 @@ let isPowerShot = false;
 const characterConfigs = [
     { name: "CR7", skin: "#c8a07a", hair: "#1a1a1a", hairStyle: 'fade', browType: 'thick', facialHair: null, faceImg: "img/face_ronaldo.png" },
     { name: "Messi", skin: "#d4a574", hair: "#2c2c2c", hairStyle: 'classic', browType: 'normal', facialHair: 'beard', faceImg: "img/face_messi.png" },
-    { name: "Neymar", skin: "#c8a070", hair: "#b8860b", hairStyle: 'mohawk', browType: 'thin', facialHair: 'goatee', faceImg: "img/face_neymar.png" },
+    { name: "Neymar", skin: "#c89668", hair: "#e8b958", hairStyle: 'neymar-fauxhawk', browType: 'stylish', facialHair: 'neymar-beard', special: 'neymar-earring', faceImg: "img/face_neymar2.png" },
     { name: "Mbappe", skin: "#5c3317", hair: "#111", hairStyle: 'buzz', browType: 'normal', facialHair: null, faceImg: "img/face_mbappe.png" },
     { name: "Yamal", skin: "#8d5524", hair: "#1a1a1a", hairStyle: 'curly', browType: 'normal', facialHair: null, faceImg: "img/face_yamal.png" },
-    { name: "DO MIXI", skin: "#d4a574", hair: "#111", hairStyle: 'pompadour', browType: null, facialHair: null, special: 'mole', faceImg: "img/face_mixi.png" }
+    { name: "Lukaku", skin: "#3c2415", hair: "#111", hairStyle: 'shaved-fade', browType: 'thick', facialHair: 'lukaku-beard', faceImg: "img/lukaku.jpg" },
+    { name: "Van Dijk", skin: "#9e704e", hair: "#140e0a", hairStyle: 'vvd-bun', browType: 'sharp', facialHair: 'vvd-goatee', faceImg: "img/vvd.jpg" },
+    { name: "IShowSpeed", skin: "#4a2f1d", hair: "#111", hairStyle: 'speed-afro', browType: 'expressive', facialHair: 'stubble', special: 'speed-eyes', faceImg: "img/speed.jpg" },
+    { name: "Xuân Son", skin: "#b38258", hair: "#1a1a1a", hairStyle: 'curly-short', browType: 'thick', facialHair: 'xuan-son-beard', faceImg: "img/xuanson.png" },
+    { name: "DO MIXI", skin: "#d4a574", hair: "#111", hairStyle: 'pompadour', browType: null, facialHair: 'mixi-style', special: 'mole', faceImg: "img/face_mixi2.jpg" }
 ];
 
 // Preload face images for canvas drawing
 const faceImages = {};
 characterConfigs.forEach(cfg => {
-    const img = new Image();
-    img.src = cfg.faceImg;
-    faceImages[cfg.faceImg] = img;
+    if (cfg.faceImg && cfg.faceImg.trim() !== '') {
+        const img = new Image();
+        img.src = cfg.faceImg;
+        faceImages[cfg.faceImg] = img;
+    }
 });
 let characterIndex = 0;
 let selectedShirtColor = '#DA291C'; // Default: Man United red
 
 // Club data: màu áo truyền thống & tên hiển thị
 const clubData = {
-    mu: { name: 'MAN UTD', shirt: '#DA291C', number: '7', accent: '#FFE500' },
-    chelsea: { name: 'CHELSEA', shirt: '#034694', number: '10', accent: '#ADBBCC' },
-    liverpool: { name: 'LIVERPOOL', shirt: '#C8102E', number: '9', accent: '#F6EB61' },
-    real: { name: 'REAL', shirt: '#ffffff', number: '7', accent: '#FEBE10' },
-    barca: { name: 'BARCA', shirt: '#004D98', number: '10', accent: '#EDBB00' },
-    juventus: { name: 'JUVENTUS', shirt: '#1e1e1e', number: '10', accent: '#c6a84d' },
-    bayern: { name: 'BAYERN', shirt: '#DC052D', number: '25', accent: '#0066B2' },
-    arsenal: { name: 'ARSENAL', shirt: '#EF0107', number: '14', accent: '#ffffff' }
+    mu: { name: 'MAN UTD', shirt: '#DA291C', number: '7', accent: '#FFE500', logo: 'img/mu.webp' },
+    chelsea: { name: 'CHELSEA', shirt: '#034694', number: '10', accent: '#ADBBCC', logo: 'img/chelsea.webp' },
+    liverpool: { name: 'LIVERPOOL', shirt: '#C8102E', number: '9', accent: '#F6EB61', logo: 'img/liver.webp' },
+    mancity: { name: 'MAN CITY', shirt: '#6CABDD', number: '17', accent: '#1C2C5B', logo: '' },
+    real: { name: 'REAL', shirt: '#ffffff', number: '7', accent: '#FEBE10', logo: 'img/real.webp' },
+    barca: { name: 'BARCA', shirt: '#004D98', number: '10', accent: '#EDBB00', logo: 'img/barca.webp' },
+    haiphong: { name: 'HẢI PHÒNG', shirt: '#DA251D', number: '9', accent: '#FFFFFF', logo: '' },
+    juventus: { name: 'JUVENTUS', shirt: '#1e1e1e', number: '10', accent: '#c6a84d', logo: 'img/juve.png' },
+    bayern: { name: 'BAYERN', shirt: '#DC052D', number: '25', accent: '#0066B2', logo: 'img/bayern.png' },
+    arsenal: { name: 'ARSENAL', shirt: '#EF0107', number: '14', accent: '#ffffff', logo: 'img/arsenal.png' }
 };
 let selectedClubId = 'mu';
 
@@ -443,10 +451,144 @@ function drawChibi(char, rotation = 0, scale = 1, isTrail = false) {
     // 1. Hair Back/Base
     ctx.fillStyle = char.hair || '#111';
     ctx.beginPath();
-    if (hs === 'mohawk') {
-        ctx.ellipse(0, -28, 12, 22, 0, 0, Math.PI * 2);
+    if (hs === 'neymar-fauxhawk' || hs === 'mohawk') {
+        // Neymar: Dark tapered sides with high textured platinum-gold fauxhawk
+        ctx.fillStyle = '#1c140e';
+        ctx.arc(0, -18, 24, Math.PI, 0);
+        ctx.fill();
+        ctx.fillRect(-24, -20, 48, 6);
+
+        // Golden highlighted textured fauxhawk
+        ctx.fillStyle = '#e8b958';
+        ctx.beginPath();
+        ctx.ellipse(0, -29, 11, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Layered curls along ridge
+        const mohawkTufts = [
+            [-8, -34, 4.5], [-4, -40, 5], [0, -44, 5.5], [4, -40, 5], [8, -34, 4.5],
+            [-6, -26, 4], [6, -26, 4], [0, -32, 5]
+        ];
+        mohawkTufts.forEach(([tx, ty, tr]) => {
+            ctx.beginPath();
+            ctx.arc(tx, ty, tr, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Blonde highlight tips
+        ctx.fillStyle = '#fbe38e';
+        [[-2, -45, 2.5], [2, -43, 2.5], [0, -37, 2.8], [-4, -30, 2.2]].forEach(([hx, hy, hr]) => {
+            ctx.beginPath();
+            ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.fillStyle = char.hair || '#111';
     } else if (hs === 'buzz') {
         ctx.arc(0, -18, 24, Math.PI, 0);
+    } else if (hs === 'shaved-fade') {
+        // Clean shaved cut for Lukaku
+        ctx.arc(0, -17, 23.5, Math.PI, 0);
+        ctx.fillRect(-24, -18, 48, 4);
+    } else if (hs === 'vvd-bun' || hs === 'topknot') {
+        // Virgil van Dijk: Sleek swept-back hair with elegant man-bun
+        ctx.fillStyle = '#140e0a';
+        ctx.arc(0, -21, 25.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillRect(-24, -21, 48, 7);
+
+        // Swept-back flowing hair texture lines
+        ctx.strokeStyle = '#281c15';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-16, -20); ctx.quadraticCurveTo(-10, -27, 0, -30);
+        ctx.moveTo(16, -20); ctx.quadraticCurveTo(10, -27, 0, -30);
+        ctx.moveTo(-8, -20); ctx.quadraticCurveTo(-4, -29, 0, -32);
+        ctx.moveTo(8, -20); ctx.quadraticCurveTo(4, -29, 0, -32);
+        ctx.stroke();
+
+        // Sleek Man-Bun / Samurai topknot tied at crown
+        ctx.fillStyle = '#140e0a';
+        ctx.beginPath();
+        ctx.ellipse(0, -34, 8, 7.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair band tie (gold accent)
+        ctx.fillStyle = '#d4ac0d';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(-4.5, -28, 9, 3.2, 1.5); else ctx.fillRect(-4.5, -28, 9, 3.2);
+        ctx.fill();
+
+        // Bun detail ring
+        ctx.strokeStyle = '#3a271c';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, -34, 5.5, -0.8, 1.2);
+        ctx.stroke();
+
+        ctx.fillStyle = char.hair || '#111';
+    } else if (hs === 'speed-afro') {
+        // IShowSpeed wild bushy textured messy afro
+        ctx.fillStyle = char.hair || '#111';
+
+        // Main high-volume afro dome (much taller and wider)
+        ctx.beginPath();
+        ctx.ellipse(0, -27, 28, 22, 0, Math.PI, 0);
+        ctx.fill();
+
+        // Base side volume
+        ctx.fillRect(-26, -26, 52, 13);
+
+        // Multi-layered wild messy afro puffs / clumps (outer ring)
+        const outerPuffs = [
+            { x: -28, y: -20, r: 8 }, { x: -30, y: -29, r: 9 }, { x: -26, y: -38, r: 9.5 },
+            { x: -17, y: -45, r: 10 }, { x: -6, y: -49, r: 10.5 }, { x: 6, y: -49, r: 10.5 },
+            { x: 17, y: -45, r: 10 }, { x: 26, y: -38, r: 9.5 }, { x: 30, y: -29, r: 9 },
+            { x: 28, y: -20, r: 8 }
+        ];
+        outerPuffs.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Wild frizzy spikes/tufts sticking out in all directions
+        const wildSpikes = [
+            [-25, -42, -33, -54],
+            [-14, -48, -20, -62],
+            [-4, -50, -6, -65],
+            [6, -50, 9, -64],
+            [17, -47, 24, -60],
+            [27, -40, 36, -52],
+            [-30, -31, -40, -36],
+            [30, -31, 40, -35],
+            [-27, -22, -37, -22],
+            [27, -22, 37, -22]
+        ];
+        ctx.strokeStyle = char.hair || '#111';
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        wildSpikes.forEach(([x1, y1, x2, y2]) => {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        });
+        // Extra mini curly tufts on spike tips for wild bushy texture
+        wildSpikes.forEach(([, , x2, y2]) => {
+            ctx.beginPath();
+            ctx.arc(x2, y2, 3.8, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    } else if (hs === 'curly-short') {
+        // Xuân Son short textured athletic curly hair
+        ctx.beginPath();
+        ctx.arc(0, -20, 24.5, Math.PI, 0);
+        ctx.fill();
+        for (let a = 0; a <= Math.PI; a += 0.45) {
+            ctx.beginPath();
+            ctx.arc(Math.cos(a + Math.PI) * 23.5, Math.sin(a + Math.PI) * 23.5 - 17, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
     } else if (hs === 'curly') {
         for (let a = 0; a < Math.PI; a += 0.4) {
             ctx.arc(Math.cos(a + Math.PI) * 24, Math.sin(a + Math.PI) * 24 - 18, 6, 0, Math.PI * 2);
@@ -471,80 +613,170 @@ function drawChibi(char, rotation = 0, scale = 1, isTrail = false) {
     ctx.arc(0, -16, 23, 0, Math.PI * 2);
     ctx.fill();
 
-    // 3. Facial Hair (Beard/Mustache)
+    // 3. Facial Hair (Beard/Mustache) - Properly placed, refined & aesthetic
     if (fh) {
-        ctx.fillStyle = hexDarken(char.hair || '#111', 0.8);
-        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = hexDarken(char.hair || '#111', 0.85);
         if (fh === 'beard') {
-            ctx.beginPath(); ctx.arc(0, -11, 23.2, 0.4, Math.PI - 0.4);
-            ctx.lineTo(0, -2); ctx.fill();
-        } else if (fh === 'goatee') {
-            ctx.beginPath(); ctx.ellipse(0, -5, 7, 8, 0, 0, Math.PI * 2); ctx.fill();
-        } else if (fh === 'mixi-style') {
-            // Refined Mixi beard: Thin mustache + sharp goatee
-            ctx.fillRect(-12, -14, 24, 1.8); // Mustache
+            // Messi: Natural warm trimmed beard hugging jawline & clean slim mustache
+            ctx.globalAlpha = 0.55;
             ctx.beginPath();
-            ctx.moveTo(-3, -10); ctx.lineTo(0, -3); ctx.lineTo(3, -10); ctx.fill(); // Soul patch
-            ctx.beginPath(); ctx.arc(0, -4, 5, 0, Math.PI); ctx.stroke(); // Chin shadow
+            ctx.arc(0, -16, 23.2, 0.45, Math.PI - 0.45);
+            ctx.lineTo(0, -2);
+            ctx.fill();
+            ctx.fillRect(-7, -13, 14, 1.4); // Slim mustache above lip
+        } else if (fh === 'neymar-beard') {
+            // Neymar: Stylish micro-pencil mustache + soul patch + tiny chin goatee
+            ctx.fillStyle = '#1c140e';
+            ctx.globalAlpha = 0.85;
+            ctx.fillRect(-6.5, -13, 13, 1.3); // Neat pencil mustache
+            ctx.fillRect(-1, -7, 2, 2); // Soul patch
+            ctx.beginPath();
+            ctx.ellipse(0, 1.5, 3.2, 3.5, 0, 0, Math.PI * 2); // Chin goatee
+            ctx.fill();
+            ctx.globalAlpha = 0.25;
+            ctx.beginPath();
+            ctx.arc(0, -16, 23.2, 0.5, Math.PI - 0.5);
+            ctx.lineTo(0, 0);
+            ctx.fill();
+        } else if (fh === 'lukaku-beard') {
+            // Lukaku: Clean dark masculine beard along jawline, slim mustache, neat chin
+            ctx.fillStyle = '#111';
+            ctx.globalAlpha = 0.75;
+            ctx.beginPath();
+            ctx.arc(0, -16, 23.4, 0.35, Math.PI - 0.35);
+            ctx.lineTo(0, -2);
+            ctx.fill();
+            ctx.fillRect(-8, -13.2, 16, 1.5); // Mustache
+            ctx.fillRect(-1.5, -7, 3, 2.2); // Soul patch
+        } else if (fh === 'vvd-goatee') {
+            // Virgil van Dijk: Sleek sculpted mustache & elegant diamond chin goatee
+            ctx.fillStyle = '#140e0a';
+            ctx.globalAlpha = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(-8, -13); ctx.quadraticCurveTo(0, -14, 8, -13);
+            ctx.lineWidth = 1.4; ctx.strokeStyle = '#140e0a'; ctx.stroke();
+            // Delicate connecting lines
+            ctx.beginPath();
+            ctx.moveTo(-6, -12.5); ctx.lineTo(-3.5, -6.5);
+            ctx.moveTo(6, -12.5); ctx.lineTo(3.5, -6.5);
+            ctx.lineWidth = 1.1; ctx.strokeStyle = '#140e0a'; ctx.stroke();
+            // Soul patch
+            ctx.fillRect(-1.2, -7, 2.4, 2);
+            // Sharp chin goatee
+            ctx.beginPath();
+            ctx.ellipse(0, 1.8, 3.8, 4.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (fh === 'xuan-son-beard') {
+            // Xuân Son: Short athletic beard along jaw & slim mustache
+            ctx.globalAlpha = 0.65;
+            ctx.beginPath();
+            ctx.arc(0, -16, 23.2, 0.45, Math.PI - 0.45);
+            ctx.lineTo(0, -2);
+            ctx.fill();
+            ctx.fillRect(-7, -13, 14, 1.3);
+            ctx.fillRect(-1, -7, 2, 2);
+        } else if (fh === 'stubble') {
+            // Light chin stubble shadow
+            ctx.globalAlpha = 0.25;
+            ctx.beginPath(); ctx.arc(0, -16, 23, 0.55, Math.PI - 0.55); ctx.lineTo(0, 0); ctx.fill();
+        } else if (fh === 'goatee') {
+            // Neat slim goatee
+            ctx.globalAlpha = 0.75;
+            ctx.fillRect(-6, -13, 12, 1.3);
+            ctx.fillRect(-1, -7, 2, 2);
+            ctx.beginPath(); ctx.ellipse(0, 1.5, 3.2, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+        } else if (fh === 'mixi-style') {
+            // Độ Mixi: Sharp thin mustache + small soul patch & chin goatee
+            ctx.globalAlpha = 0.8;
+            ctx.fillRect(-7, -13, 14, 1.3); // Mustache
+            ctx.fillRect(-1.2, -7, 2.4, 2); // Soul patch
+            ctx.beginPath(); ctx.arc(0, 2, 3.2, 0, Math.PI); ctx.fill(); // Chin goatee
         }
         ctx.globalAlpha = 1.0;
     }
 
     // 4. Eyes
+    const isSpeed = char.special === 'speed-eyes';
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(-8, -16, 4.5, 0, Math.PI * 2);
-    ctx.arc(8, -16, 4.5, 0, Math.PI * 2);
+    const eyeRadius = isSpeed ? 5.5 : 4.5;
+    ctx.arc(-8, -16, eyeRadius, 0, Math.PI * 2);
+    ctx.arc(8, -16, eyeRadius, 0, Math.PI * 2);
     ctx.fill();
 
     // Pupils
     ctx.fillStyle = '#111';
     ctx.beginPath();
     let eyeFocusY = (state === 'kicking') ? -15 : -16;
-    ctx.arc(-8, eyeFocusY, 2.2, 0, Math.PI * 2);
-    ctx.arc(8, eyeFocusY, 2.2, 0, Math.PI * 2);
+    const pupilRadius = isSpeed ? 2.6 : 2.2;
+    ctx.arc(-8, eyeFocusY, pupilRadius, 0, Math.PI * 2);
+    ctx.arc(8, eyeFocusY, pupilRadius, 0, Math.PI * 2);
     ctx.fill();
 
     // 5. Eyebrows
     ctx.strokeStyle = hexDarken(char.hair || '#111', 0.5);
-    ctx.lineWidth = (bt === 'thick') ? 2.8 : 1.8;
+    ctx.lineWidth = (bt === 'thick') ? 2.8 : (bt === 'expressive' ? 2.6 : 1.8);
     ctx.beginPath();
     if (bt === 'thick') {
         ctx.moveTo(-14, -23); ctx.lineTo(-3, -21.5);
         ctx.moveTo(14, -23); ctx.lineTo(3, -21.5);
+    } else if (bt === 'expressive') {
+        // High energetic raised eyebrows for Speed
+        ctx.moveTo(-14, -25); ctx.lineTo(-3, -22);
+        ctx.moveTo(14, -25); ctx.lineTo(3, -22);
+    } else if (bt === 'stylish') {
+        // Neymar stylish curved groomed eyebrows
+        ctx.lineWidth = 2.1;
+        ctx.moveTo(-13, -22.5); ctx.quadraticCurveTo(-7, -25.5, -3, -23);
+        ctx.moveTo(13, -22.5); ctx.quadraticCurveTo(7, -25.5, 3, -23);
     } else if (bt === 'sharp') {
-        ctx.lineWidth = 2.2;
-        ctx.moveTo(-14, -22); ctx.lineTo(-4, -24);
-        ctx.moveTo(14, -22); ctx.lineTo(4, -24);
+        ctx.lineWidth = 2.4;
+        ctx.moveTo(-14, -22.5); ctx.lineTo(-4, -24.5);
+        ctx.moveTo(14, -22.5); ctx.lineTo(4, -24.5);
     } else {
         ctx.moveTo(-13, -22.5); ctx.quadraticCurveTo(-8, -25, -3, -22);
         ctx.moveTo(13, -22.5); ctx.quadraticCurveTo(8, -25, 3, -22);
     }
     ctx.stroke();
 
-    // 6. Mouth
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-    ctx.lineWidth = 2.2;
+    // 6. Mouth - Cleanly visible and charming
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
     if (state === 'sad') {
-        ctx.arc(0, -4, 6, Math.PI, 0);
-    } else if (state === 'smile' || state === 'catching') {
-        ctx.arc(0, -11, 8, 0.1, Math.PI - 0.1);
+        ctx.arc(0, -6, 4.5, Math.PI, 0);
+    } else if (state === 'smile' || state === 'catching' || isSpeed) {
+        ctx.arc(0, -9.5, 6, 0.15, Math.PI - 0.15);
     } else if (state === 'running') {
-        ctx.arc(0, -10, 3.5, 0, Math.PI * 2); // Small O shape
+        ctx.arc(0, -9, 2.8, 0, Math.PI * 2);
     } else {
-        ctx.arc(0, -11, 5, 0.4, Math.PI - 0.4);
+        ctx.arc(0, -9.5, 4.2, 0.35, Math.PI - 0.35);
     }
     ctx.stroke();
 
-    // 7. Special Extras (Mole, etc.)
+    // 7. Special Extras (Mole, Earring, etc.)
     if (char.special === 'mole') {
         ctx.fillStyle = '#111';
         ctx.beginPath(); ctx.arc(9, -10, 2, 0, Math.PI * 2); ctx.fill();
     }
-    if (name === 'NEYMAR') { // Earring
-        ctx.fillStyle = '#ffd700';
-        ctx.beginPath(); ctx.arc(23, -16, 2, 0, Math.PI * 2); ctx.fill();
+    if (isSpeed) {
+        // Messy textured front curls sticking out on forehead
+        ctx.fillStyle = char.hair || '#111';
+        const frontTufts = [
+            [-16, -26, 4.5], [-9, -28, 5], [-1, -27, 5.2], [7, -28, 4.8], [15, -26, 4.5],
+            [-5, -24, 2.5], [4, -24, 2.8]
+        ];
+        frontTufts.forEach(([cx, cy, cr]) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+    if (char.special === 'neymar-earring' || name === 'NEYMAR') { // Sparkling Diamond Earring
+        ctx.fillStyle = '#d4ac0d';
+        ctx.beginPath(); ctx.arc(23.5, -16, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(23.5, -16, 1.3, 0, Math.PI * 2); ctx.fill();
     }
 
     // --- SHIRT TEXT ---
@@ -814,16 +1046,24 @@ function selectModule(num) {
 }
 
 function selectChar(idx) {
+    if (idx < 0 || idx >= characterConfigs.length) idx = 0;
     characterIndex = idx;
     document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active'));
-    document.getElementById('char' + idx).classList.add('active');
+    const el = document.getElementById('char' + idx);
+    if (el) el.classList.add('active');
 }
 
 function selectClub(clubId, el) {
+    if (!clubData[clubId]) clubId = 'mu';
     selectedClubId = clubId;
     selectedShirtColor = clubData[clubId].shirt;
     document.querySelectorAll('.club-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+    if (el) {
+        el.classList.add('active');
+    } else {
+        const target = document.getElementById('club-' + clubId);
+        if (target) target.classList.add('active');
+    }
 }
 
 function validateNumberInput(el) {
@@ -1103,16 +1343,34 @@ function handleTimeOut() {
     if (submitBtn) submitBtn.style.display = 'none';
     if (directionBox) directionBox.style.display = 'none';
 
-    const isDead = handleLifeLoss();
+    consecutiveCorrect = 0;
+    isPowerShot = false;
+    render();
+
+    const q = activeQuestions[currentQuestion];
+    let correctSolutionHtml = '';
+    if (q) {
+        if (q.type === 'mcq') {
+            correctSolutionHtml = `<div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #27ae60;">
+                <b>✅ Đáp án đúng của câu này là:</b> <span style="font-weight: 700;">${q.opts[q.ans]}</span>
+            </div>`;
+        } else {
+            correctSolutionHtml = `<div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #2c3e50;">
+                <b>💡 Gợi ý mẫu code đúng:</b> <code style="background: #fff; padding: 3px 8px; border-radius: 4px; color: #c0392b; font-weight: 700; font-family: monospace;">${q.h}</code>
+            </div>`;
+        }
+    }
 
     showPenaltyModal(
         "⏱️ HẾT GIỜ SUY NGHĨ!",
-        `Bạn đã quá thời gian làm bài cho phép.<br>Bạn bị <b>trừ 1 tim ❤️</b> và mất lượt sút này!`,
+        `Bạn đã hết thời gian làm bài cho câu hỏi này.<br>Bạn bị <b>mất lượt sút</b> câu này nhưng <b>không bị trừ tim ❤️</b>!
+        ${correctSolutionHtml}
+        <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.9rem; color: #7f8c8d;">
+            <b>👉 Lưu ý:</b> Hãy quan sát đồng hồ đếm ngược và chọn câu trả lời nhanh hơn ở lượt tiếp theo nhé!
+        </div>`,
         () => {
-            if (!isDead) {
-                currentQuestion++;
-                showQuestion();
-            }
+            currentQuestion++;
+            showQuestion();
         }
     );
 }
@@ -1490,7 +1748,11 @@ function updateWisePreview() {
     const wiseIcon = document.getElementById('wiseIcon');
     const nameElem = document.getElementById('wisePersonName');
 
-    if (person === 'lukaku') {
+    if (person === 'truong_con') {
+        if (nameElem) nameElem.innerText = "Bác Trường con Nam Định";
+        setHelperImage(wiseImg, 'img/truong_con.jpg', ['img/truongcon.jpg', 'img/truongcon.png', 'img/truong_con.png']);
+        if (wiseIcon) wiseIcon.innerText = "🦅";
+    } else if (person === 'lukaku') {
         if (nameElem) nameElem.innerText = "Romelu Lukaku (Lakaka)";
         setHelperImage(wiseImg, 'img/lakaka.jpg', []);
         if (wiseIcon) wiseIcon.innerText = "🧱";
@@ -1564,7 +1826,7 @@ function playCharacterAudio(audioId) {
 }
 
 function stopAllLifelineAudio() {
-    ['callAudio', 'callAudio_messi', 'wiseAudio', 'wiseAudio_lukaku', 'wiseAudio_cr7'].forEach(id => {
+    ['callAudio', 'callAudio_messi', 'wiseAudio', 'wiseAudio_lukaku', 'wiseAudio_cr7', 'wiseAudio_truongcon'].forEach(id => {
         const audio = document.getElementById(id);
         if (audio) {
             audio.pause();
@@ -1633,7 +1895,20 @@ function confirmWise() {
     const wiseMsg = document.getElementById('wiseMsg');
     const wiseResult = document.getElementById('wiseResult');
 
-    if (person === 'lukaku') {
+    if (person === 'truong_con') {
+        playCharacterAudio('wiseAudio_truongcon');
+        setHelperImage(wiseImg, 'img/truong_con.jpg', ['img/truongcon.jpg', 'img/truongcon.png', 'img/truong_con.png']);
+        if (wiseIcon) wiseIcon.innerText = "🦅";
+        wiseMsg.style.color = "#8e44ad";
+        wiseMsg.innerText = "Bác Trường con Nam Định đang nhận định...";
+        setTimeout(() => {
+            wiseMsg.innerText = "Bác Trường con Nam Định dặn dò kĩ càng:";
+            wiseResult.innerHTML = `Bác Trường con phán: <div class="highlight-code">${resultText}</div><span class="extra-msg">"Anh em Nam Định sống bằng tình cảm, chọn đúng câu này là chuẩn bài!"</span>`;
+            player.thought = "Cảm ơn bác Trường con Nam Định chuẩn chất chơi!";
+            document.getElementById('closeWiseBtn').style.display = 'inline-block';
+            render();
+        }, 1500);
+    } else if (person === 'lukaku') {
         playCharacterAudio('wiseAudio_lukaku');
         setHelperImage(wiseImg, 'img/lakaka.jpg', []);
         if (wiseIcon) wiseIcon.innerText = "🧱";
