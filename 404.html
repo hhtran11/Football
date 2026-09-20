@@ -2,29 +2,13 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đang chuyển hướng...</title>
+  <meta http-equiv="refresh" content="0; url=index.html" />
+  <title>Game Đã Chính Thức Đóng Cửa</title>
   <script>
-    async function checkMaintenance() {
-      try {
-        const flagUrl = new URL('maintenance.json', window.location.href);
-        const maintenanceUrl = new URL('maintenance.html', window.location.href);
-        const indexUrl = new URL('index.html', window.location.href);
-        const res = await fetch(flagUrl.toString() + '?ts=' + Date.now());
-        const data = await res.json();
-        if (data.maintenance) {
-          window.location.replace(maintenanceUrl.toString());
-        } else {
-          window.location.replace(indexUrl.toString());
-        }
-      } catch (e) {
-        window.location.replace(new URL('index.html', window.location.href).toString());
-      }
-    }
-    checkMaintenance();
+    window.location.replace('index.html');
   </script>
 </head>
-<body>
-  <p>Đang kiểm tra trạng thái trang...</p>
+<body style="background:#070d18; color:#fff; font-family:sans-serif; text-align:center; padding-top:20vh;">
+  <p>Đang chuyển hướng về trang thông báo chính thức...</p>
 </body>
 </html>

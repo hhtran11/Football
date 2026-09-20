@@ -3,463 +3,1740 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Game Sút Penalty - Bóng Đá</title>
-    <script>
-        (function () {
-            const maintenanceUrl = new URL('maintenance.html', window.location.href);
-            const flagUrl = new URL('maintenance.json', window.location.href);
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Báo: Game Đã Chính Thức Đóng Cửa | Penalty Master</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #070d18;
+            --bg-card: rgba(13, 24, 43, 0.82);
+            --gold-main: #ffd15c;
+            --gold-gradient: linear-gradient(135deg, #ffe082 0%, #ffb300 50%, #ff8f00 100%);
+            --text-main: #ffffff;
+            --text-sub: #b4c6db;
+            --border-glow: rgba(255, 209, 92, 0.35);
+            --rose-accent: #f43f5e;
+            --cyan-accent: #38bdf8;
+            --emerald-accent: #10b981;
+        }
 
-            fetch(flagUrl.toString() + '?ts=' + Date.now())
-                .then(function (response) {
-                    if (!response.ok) throw new Error('No maintenance flag');
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data && data.maintenance) {
-                        window.location.replace(maintenanceUrl.toString());
-                    }
-                })
-                .catch(function () { });
-        })();
-    </script>
-    <link rel="stylesheet" href="style.css">
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Outfit', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 16px 60px;
+        }
+
+        /* Ambient Dynamic Background */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow-1 {
+            top: -10%;
+            left: 15%;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, #ffb300, transparent 70%);
+        }
+
+        .glow-2 {
+            bottom: -10%;
+            right: 15%;
+            width: 520px;
+            height: 520px;
+            background: radial-gradient(circle, #38bdf8, transparent 70%);
+        }
+
+        .glow-3 {
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #f43f5e, transparent 75%);
+            opacity: 0.15;
+        }
+
+        /* ================= INTRO RONALDO SIUUU OVERLAY ================= */
+        #introOverlay {
+            position: fixed;
+            inset: 0;
+            background: #040911;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+        }
+
+        #introOverlay.fade-out {
+            opacity: 0;
+            transform: scale(1.06);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .intro-container {
+            width: min(94vw, 1060px);
+            aspect-ratio: 16/9;
+            max-height: 80vh;
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 209, 92, 0.3);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 209, 92, 0.2);
+            background: #0a1f14;
+        }
+
+        #introCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .intro-skip-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .intro-skip-btn:hover {
+            background: var(--gold-main);
+            color: #000;
+            border-color: var(--gold-main);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 209, 92, 0.4);
+        }
+
+        .intro-title-tag {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 209, 92, 0.5);
+            color: var(--gold-main);
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= MAIN FAREWELL CONTAINER ================= */
+        .closed-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 950px;
+            margin: auto;
+            opacity: 0;
+            transform: translateY(30px) scale(0.97);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .closed-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .closed-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            border-radius: 36px;
+            padding: 50px 45px;
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.65),
+                0 0 50px rgba(255, 209, 92, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .closed-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffb300, #f43f5e, #38bdf8, transparent);
+            animation: shimmerLine 4s linear infinite;
+        }
+
+        @keyframes shimmerLine {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(50%); }
+        }
+
+        /* Header Elements */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 209, 92, 0.1);
+            border: 1px solid var(--border-glow);
+            color: var(--gold-main);
+            padding: 8px 22px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(255, 209, 92, 0.15);
+        }
+
+        .status-badge .badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-main);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold-main);
+            animation: pulseDot 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 0.4; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        /* Memorial Crest / Icon */
+        .crest-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 20px;
+        }
+
+        .crest-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 209, 92, 0.4);
+            animation: rotateRing 20s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .crest-bg {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 209, 92, 0.2), rgba(244, 63, 94, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            transform: rotate(-5deg);
+            transition: transform 0.4s ease;
+        }
+
+        .crest-wrapper:hover .crest-bg {
+            transform: rotate(0deg) scale(1.08);
+        }
+
+        /* Typography */
+        h1.main-title {
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 30%, #ffd15c 80%, #ff9f43 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--gold-main);
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Replay Animation Action Bar */
+        .replay-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .btn-replay {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 209, 92, 0.35);
+            color: var(--gold-main);
+            padding: 9px 20px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-replay:hover {
+            background: var(--gold-main);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 209, 92, 0.35);
+        }
+
+        /* ================= FIXED FLOATING SCROLL TO READ MORE (BREATHING FADE) ================= */
+        .fixed-scroll-indicator {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+            pointer-events: auto;
+            animation: pulseBreathe 2.4s infinite ease-in-out;
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+        }
+
+        .fixed-scroll-indicator.hidden {
+            opacity: 0 !important;
+            transform: translate(-50%, 15px) !important;
+            pointer-events: none !important;
+            visibility: hidden;
+        }
+
+        .mouse-icon {
+            width: 22px;
+            height: 36px;
+            border: 2px solid var(--gold-main);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            padding-top: 6px;
+            box-shadow: 0 0 15px rgba(255, 209, 92, 0.35);
+            background: rgba(8, 18, 33, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .mouse-wheel {
+            width: 4px;
+            height: 8px;
+            background: var(--gold-main);
+            border-radius: 2px;
+            animation: mouseScrollAnim 1.6s infinite ease-in-out;
+        }
+
+        @keyframes mouseScrollAnim {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(12px); opacity: 0; }
+        }
+
+        .scroll-text {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gold-main);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 209, 92, 0.5);
+            background: rgba(8, 18, 33, 0.6);
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 209, 92, 0.25);
+            backdrop-filter: blur(6px);
+        }
+
+        .chevrons-down {
+            color: var(--gold-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 8px rgba(255, 209, 92, 0.5));
+            animation: chevronBounce 1.4s infinite ease-in-out;
+        }
+
+        @keyframes chevronBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+
+        @keyframes pulseBreathe {
+            0%, 100% {
+                opacity: 0.22;
+                transform: translate(-50%, 0) scale(0.96);
+            }
+            50% {
+                opacity: 0.98;
+                transform: translate(-50%, 4px) scale(1.02);
+            }
+        }
+
+        /* The Heartfelt Gratitude Letter */
+        .letter-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 35px 30px;
+            margin-bottom: 35px;
+            text-align: left;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .letter-card .letter-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+
+        .letter-content {
+            font-size: 1.08rem;
+            line-height: 1.85;
+            color: #e1e9f5;
+        }
+
+        .letter-content p {
+            margin-bottom: 16px;
+        }
+
+        .letter-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight-text {
+            color: var(--gold-main);
+            font-weight: 700;
+        }
+
+        .highlight-bright {
+            background: linear-gradient(120deg, rgba(255, 209, 92, 0.25), rgba(244, 63, 94, 0.25));
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Memory Highlights Grid */
+        .memories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .memory-item {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 22px 18px;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .memory-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 209, 92, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .memory-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        .memory-title {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .memory-desc {
+            font-size: 0.9rem;
+            line-height: 1.55;
+            color: var(--text-sub);
+        }
+
+        /* ================= SOUNDBOARD SECTION ================= */
+        .soundboard-section {
+            background: linear-gradient(180deg, rgba(16, 32, 56, 0.8) 0%, rgba(8, 18, 33, 0.9) 100%);
+            border: 1.5px solid rgba(255, 209, 92, 0.25);
+            border-radius: 28px;
+            padding: 32px 26px;
+            margin-bottom: 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+            text-align: center;
+            position: relative;
+        }
+
+        .soundboard-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .soundboard-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--cyan-accent);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .soundboard-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .soundboard-desc {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            max-width: 580px;
+        }
+
+        /* Now Playing Bar */
+        .now-playing-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 10px 18px;
+            margin-bottom: 20px;
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .now-playing-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .now-playing-status strong {
+            color: var(--gold-main);
+        }
+
+        /* Equalizer Animation */
+        .equalizer {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 16px;
+        }
+
+        .equalizer span {
+            width: 3px;
+            background: var(--gold-main);
+            border-radius: 2px;
+            animation: eqBounce 1s infinite ease-in-out;
+        }
+
+        .equalizer span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+        .equalizer span:nth-child(2) { height: 80%; animation-delay: 0.3s; }
+        .equalizer span:nth-child(3) { height: 50%; animation-delay: 0.2s; }
+        .equalizer span:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+
+        @keyframes eqBounce {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+
+        .stop-all-btn {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #ff6b81;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stop-all-btn:hover {
+            background: var(--rose-accent);
+            color: #fff;
+        }
+
+        /* Sound Buttons Grid */
+        .soundboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .sound-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 16px 14px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .sound-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 209, 92, 0.5);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .sound-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .sound-btn .s-icon {
+            font-size: 2rem;
+            transition: transform 0.25s ease;
+        }
+
+        .sound-btn:hover .s-icon {
+            transform: scale(1.15);
+        }
+
+        .sound-btn .s-name {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .sound-btn .s-tag {
+            font-size: 0.74rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        /* Active Playing Sound Button */
+        .sound-btn.playing {
+            background: linear-gradient(145deg, rgba(255, 209, 92, 0.22), rgba(244, 63, 94, 0.2)) !important;
+            border: 1.5px solid var(--gold-main) !important;
+            box-shadow: 0 0 25px rgba(255, 209, 92, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            transform: translateY(-3px) scale(1.03);
+        }
+
+        .sound-btn.playing .s-name {
+            color: var(--gold-main);
+        }
+
+        .sound-btn.playing::after {
+            content: '▶ ĐANG PHÁT';
+            position: absolute;
+            bottom: 4px;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            color: var(--gold-main);
+            animation: pulseDot 1s infinite alternate;
+        }
+
+        /* ================= FOOTER ================= */
+        .farewell-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quote-text {
+            font-style: italic;
+            color: var(--text-sub);
+            font-size: 0.98rem;
+            max-width: 650px;
+            line-height: 1.6;
+        }
+
+        .signature {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--gold-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 650px) {
+            .closed-card {
+                padding: 35px 20px;
+                border-radius: 28px;
+            }
+            .letter-card {
+                padding: 24px 18px;
+            }
+            .letter-content {
+                font-size: 1rem;
+            }
+            .memories-grid {
+                grid-template-columns: 1fr;
+            }
+            .soundboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .sound-btn {
+                padding: 14px 10px;
+            }
+            .sound-btn .s-icon {
+                font-size: 1.7rem;
+            }
+            .sound-btn .s-name {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div id="welcomeScreen" class="welcome-overlay">
-        <div class="welcome-container">
-            <div class="welcome-card">
-                <div class="welcome-header">
-                    <h2>⚽ PENALTY MASTER ⚽</h2>
-                    <p>Nâng tầm kỹ năng lập trình Python của bạn!</p>
-                </div>
+    <!-- Background Elements -->
+    <canvas id="bgCanvas"></canvas>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
 
-                <div class="rules-section">
-                    <h3>🎁 QUY TẮC NHẬN QUÀ</h3>
-                    <div class="rules-grid">
-                        <div class="rule-item">
-                            <span class="rule-icon">🎯</span>
-                            <p>Ghi <b>7 - 8</b> bàn: Được mở <b>1</b> bao lì xì</p>
-                        </div>
-                        <div class="rule-item">
-                            <span class="rule-icon">🔥</span>
-                            <p>Ghi <b>9 - 10</b> bàn: Được mở <b>2</b> bao lì xì</p>
-                        </div>
-                        <div class="rule-item">
-                            <span class="rule-icon">👑</span>
-                            <p>Ghi <b>> 10</b> bàn: Được mở <b>3</b> bao lì xì</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rules-section timer-rules-section"
-                    style="background: rgba(230, 126, 34, 0.1); margin-bottom: 25px;">
-                    <h3 style="color: #d35400;">⏱️ THỜI GIAN LÀM BÀI & CHỐNG GIAN LẬN</h3>
-                    <div class="rules-grid">
-                        <div class="rule-item">
-                            <span class="rule-icon">⚡</span>
-                            <p><b>Module 1 & 2:</b> Trắc nghiệm <b>30s</b> | Code <b>45s</b></p>
-                        </div>
-                        <div class="rule-item">
-                            <span class="rule-icon">🧠</span>
-                            <p><b>Module 3 & 4:</b> Trắc nghiệm <b>40s</b> | Code <b>60s</b></p>
-                        </div>
-                        <div class="rule-item" style="border-left: 4px solid #e74c3c;">
-                            <span class="rule-icon">⚠️</span>
-                            <p><b>Phạt -1 tim ❤️:</b> Chuyển tab / rời game / vi phạm gian lận!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="module-selection">
-                    <h3>📚 CHỌN MODULE THỬ THÁCH</h3>
-                    <div class="module-options">
-                        <div class="module-card active" id="mod1" onclick="selectModule(1)">
-                            <div class="mod-icon">🐍</div>
-                            <h4>Module 1</h4>
-                            <p>Python cơ bản: biến, nhập/xuất, điều kiện, vòng lặp</p>
-                        </div>
-                        <div class="module-card" id="mod2" onclick="selectModule(2)">
-                            <div class="mod-icon">📊</div>
-                            <h4>Module 2</h4>
-                            <p>Thuật toán và cấu trúc dữ liệu: list, dict, set</p>
-                        </div>
-                        <div class="module-card" id="mod3" onclick="selectModule(3)">
-                            <div class="mod-icon">🧠</div>
-                            <h4>Module 3</h4>
-                            <p>Ôn tập nâng cao: dict, tuple, set, map, zip, lambda</p>
-                        </div>
-                        <div class="module-card" id="mod4" onclick="selectModule(4)">
-                            <div class="mod-icon">🧩</div>
-                            <h4>Module 4</h4>
-                            <p>List, Set, Tuple, Dictionary + map, filter, lambda, try-except, math</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="player-start-bar">
-                    <div class="input-group">
-                        <label>Tên người chơi</label>
-                        <input type="text" id="playerNameInput" placeholder="Nhập tên của bạn...">
-                    </div>
-                    <div class="input-group">
-                        <label>Số áo</label>
-                        <input type="number" id="playerNumberInput" min="1" max="99" placeholder="Số..">
-                    </div>
-                </div>
-
-                <div class="player-start-bar gk-bar">
-                    <div class="input-group">
-                        <label>Tên thủ môn</label>
-                        <input type="text" id="gkNameInput" placeholder="Tên thủ môn...">
-                    </div>
-                    <div class="input-group">
-                        <label>Số áo</label>
-                        <input type="number" id="gkNumberInput" min="1" max="99" placeholder="Số..">
-                    </div>
-                </div>
-
-                <div class="character-selection">
-                    <h3>🧑‍⚽ CHỌN CẦU THỦ</h3>
-                    <div class="char-options">
-                        <div class="char-card active" onclick="selectChar(0)" id="char0">
-                            <img class="char-face" src="img/face_cr7.jpg" alt="Ronaldo">
-                            <span class="char-label">CR7</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(1)" id="char1">
-                            <img class="char-face" src="img/face_messi2.jpg" alt="Messi">
-                            <span class="char-label">Messi</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(2)" id="char2">
-                            <img class="char-face" src="img/face_neymar2.png" alt="Neymar">
-                            <span class="char-label">Neymar</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(3)" id="char3">
-                            <img class="char-face" src="img/face_mbappe2.jpg" alt="Mbappe">
-                            <span class="char-label">Mbappé</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(4)" id="char4">
-                            <img class="char-face" src="img/face_yamal2.jpg" alt="Yamal">
-                            <span class="char-label">Yamal</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(5)" id="char5">
-                            <img class="char-face" src="img/lukaku.jpg" alt="Lukaku">
-                            <span class="char-label">Lukaku</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(6)" id="char6">
-                            <img class="char-face" src="img/vvd.jpg" alt="Van Dijk">
-                            <span class="char-label">Van Dijk</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(7)" id="char7">
-                            <img class="char-face" src="img/speed.jpg" alt="Speed">
-                            <span class="char-label">Speed</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(8)" id="char8">
-                            <img class="char-face" src="img/xuanson.png" alt="Xuân Son">
-                            <span class="char-label">Xuân Son</span>
-                        </div>
-                        <div class="char-card" onclick="selectChar(9)" id="char9">
-                            <img class="char-face" src="img/face_mixi2.jpg" alt="Mixi">
-                            <span class="char-label">Độ Mixi</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="club-selection">
-                    <h3>🏟️ CHỌN CÂU LẠC BỘ</h3>
-                    <div class="club-options">
-                        <div class="club-card active" id="club-mu" onclick="selectClub('mu', this)">
-                            <img src="img/mu.webp" class="club-logo" alt="Man Utd">
-                            <span class="club-name">Man Utd</span>
-                        </div>
-                        <div class="club-card" id="club-chelsea" onclick="selectClub('chelsea', this)">
-                            <img src="img/chelsea.webp" class="club-logo" alt="Chelsea">
-                            <span class="club-name">Chelsea</span>
-                        </div>
-                        <div class="club-card" id="club-liverpool" onclick="selectClub('liverpool', this)">
-                            <img src="img/liver.webp" class="club-logo" alt="Liverpool">
-                            <span class="club-name">Liverpool</span>
-                        </div>
-                        <div class="club-card" id="club-mancity" onclick="selectClub('mancity', this)">
-                            <img src="img/mc.png" class="club-logo" alt="Man City">
-                            <span class="club-name">Man City</span>
-                        </div>
-                        <div class="club-card" id="club-real" onclick="selectClub('real', this)">
-                            <img src="img/real.webp" class="club-logo" alt="Real Madrid">
-                            <span class="club-name">Real Madrid</span>
-                        </div>
-                        <div class="club-card" id="club-barca" onclick="selectClub('barca', this)">
-                            <img src="img/barca.webp" class="club-logo" alt="Barcelona">
-                            <span class="club-name">Barcelona</span>
-                        </div>
-                        <div class="club-card" id="club-haiphong" onclick="selectClub('haiphong', this)">
-                            <img src="img/hpfc.png" class="club-logo" alt="Hải Phòng">
-                            <span class="club-name">Hải Phòng</span>
-                        </div>
-                        <div class="club-card" id="club-juventus" onclick="selectClub('juventus', this)">
-                            <img src="img/juve.png" class="club-logo" alt="Juventus">
-                            <span class="club-name">Juventus</span>
-                        </div>
-                        <div class="club-card" id="club-bayern" onclick="selectClub('bayern', this)">
-                            <img src="img/bayern.png" class="club-logo" alt="Bayern">
-                            <span class="club-name">Bayern</span>
-                        </div>
-                        <div class="club-card" id="club-arsenal" onclick="selectClub('arsenal', this)">
-                            <img src="img/arsenal.png" class="club-logo" alt="Arsenal">
-                            <span class="club-name">Arsenal</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 25px;">
-                    <button class="start-game-btn" style="width: 100%; border-radius: 20px;" onclick="startGame()">BẮT
-                        ĐẦU CHINH PHỤC</button>
-                </div>
-
-                <!-- Custom Validation Modal -->
-                <div id="mixiNotice" class="mixi-modal" style="display: none;">
-                    <div class="mixi-modal-content">
-                        <img src="img/mixi_soao.jpg" alt="Mixi nhắc nhở" class="mixi-notice-img">
-                        <p class="mixi-notice-text">“Nhớ có tên và số áo như anh nhé!”</p>
-                        <button class="mixi-close-btn" onclick="closeMixiNotice()">Okkkk anh Độ!</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="leaderboard-card">
-                <div class="leaderboard-header">
-                    <h3>🏆 BẢNG XẾP HẠNG</h3>
-                    <select id="leaderboardFilter" onchange="renderLeaderboard()" class="leader-select">
-                        <option value="1">Module 1</option>
-                        <option value="2">Module 2</option>
-                        <option value="3">Module 3</option>
-                        <option value="4">Module 4</option>
-                    </select>
-                </div>
-                <div id="leaderboardList" class="leaderboard-list">
-                    <div class="empty-state">Chưa có dữ liệu xếp hạng</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="gameContainer" style="display: none; flex-direction: column; align-items: center; width: 100%;">
-        <div id="rulePanel">
-            <h3>🎁 QUY TẮC & THỜI GIAN</h3>
-            <ul>
-                <li>✅ Ghi <b>7 - 8</b> bàn: Mở <b>1</b> bao lì xì</li>
-                <li>🚀 Ghi <b>9 - 10</b> bàn: Mở <b>2</b> bao lì xì</li>
-                <li>🔥 Ghi <b>> 10</b> bàn: Mở <b>3</b> bao lì xì</li>
-                <li style="color:#e67e22; font-weight:700;">☄️ Combo 3 câu đúng: <b>POWERSHOT (x2)</b></li>
-                <li
-                    style="color:#d35400; font-weight:700; border-top: 1px dashed rgba(0,0,0,0.15); padding-top: 5px; margin-top: 5px;">
-                    ⏱️ Hết giờ: <b>MẤT LƯỢT</b> | Chuyển tab: <b>TRỪ 1 TIM ❤️</b></li>
-            </ul>
-        </div>
-        <h1>PENALTY MASTER ⚽</h1>
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-
-        <div id="questionBox">
-            <div class="question-top-bar">
-                <div id="lifelines">
-                    <button class="lifeline-btn" id="callBtn" onclick="useLifeline('call')">📞 Gọi điện</button>
-                    <button class="lifeline-btn" id="wiseBtn" onclick="useLifeline('wise')">🧙 Thông thái</button>
-                    <button class="lifeline-btn" id="fiftyBtn" onclick="useLifeline('fifty')">🌓 50/50</button>
-                </div>
-                <div id="timerBadge" class="timer-badge" title="Thời gian còn lại cho câu hỏi">
-                    ⏱️ <span id="timerSeconds">30</span>s
-                </div>
-            </div>
-            <div id="question"></div>
-
-            <div id="directionBox" style="display:none; margin: 15px 0;">
-                <p style="font-weight:700; color:var(--primary-dark); margin: 0 0 10px 0;">🎯 CHỌN HƯỚNG SÚT:</p>
-                <div class="button-group">
-                    <button onclick="shoot(0)">Góc trái</button>
-                    <button onclick="shoot(1)">Ở giữa</button>
-                    <button onclick="shoot(2)">Góc phải</button>
-                </div>
-            </div>
-
-            <div id="optsContainer" style="display:none; margin: 15px 0;"></div>
-            <textarea id="answer" rows="2" placeholder="Viết code Python trả lời..."></textarea><br>
-            <button id="submitBtn" onclick="submitAnswer()">Trả lời</button>
-            <div id="hint"></div>
-        </div>
-
-        <!-- Calling Modal -->
-        <div id="callModal" class="modal" style="display:none;">
-            <div class="modal-content" style="position: relative;">
-                <span class="modal-close-x" onclick="closeModalWithoutUsing('callModal')">&times;</span>
-                <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">📞 CHỌN NGƯỜI MUỐN GỌI ĐIỆN</h3>
-                <div id="callSelectionBox" class="radio-selection-box">
-                    <label class="radio-label">
-                        <input type="radio" name="callPerson" value="mixi" checked onchange="updateCallPreview()">
-                        <span>📞 Anh Độ Mixi</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="callPerson" value="messi" onchange="updateCallPreview()">
-                        <span>🐐 GOAT Messi</span>
-                    </label>
-                </div>
-                <div class="mixi-flex">
-                    <div style="text-align: center;">
-                        <h4 id="callPersonName"
-                            style="margin: 0 0 10px 0; color: #e74c3c; font-size: 1.2rem; font-weight: 800;">Anh Độ Mixi
-                        </h4>
-                        <img src="img/mixi.jpg" alt="Gọi điện" id="callImg"
-                            style="width: 140px; max-width: 100%; height: auto; max-height: 150px; object-fit: contain; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                    </div>
-                    <div class="mixi-content">
-                        <div id="callingIcon">📱</div>
-                        <div id="callMsg" style="font-weight: 700; color: #e74c3c;">Chọn người bạn muốn gọi</div>
-                        <div id="callResult"></div>
-                        <button id="startCallBtn" onclick="confirmCall()"
-                            style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">📞 BẮT ĐẦU
-                            GỌI</button>
-                        <button id="closeCallBtn" onclick="closeModal('callModal')"
-                            style="display:none; background: linear-gradient(135deg, #27ae60, #2ecc71); margin-top: 15px; padding: 12px 25px; border-radius: 25px; font-weight: 800; font-size: 1rem; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
-                            ⚽ ĐÃ HIỂU, VÀO SÚT PEN!
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Wise Modal -->
-        <div id="wiseModal" class="modal" style="display:none;">
-            <div class="modal-content" style="position: relative;">
-                <span class="modal-close-x" onclick="closeModalWithoutUsing('wiseModal')">&times;</span>
-                <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">🧙 CHỌN NHÀ THÔNG THÁI TRỢ GIÚP</h3>
-                <div id="wiseSelectionBox" class="radio-selection-box">
-                    <label class="radio-label">
-                        <input type="radio" name="wisePerson" value="TAN" checked onchange="updateWisePreview()">
-                        <span>🧙 Bác Trương Anh Ngọc</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="wisePerson" value="truong_con" onchange="updateWisePreview()">
-                        <span>🦅 Bác Trường con Nam Định</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="wisePerson" value="lukaku" onchange="updateWisePreview()">
-                        <span>🧱 Romelu Lukaku</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="wisePerson" value="cr7" onchange="updateWisePreview()">
-                        <span>⚽ Cristiano Ronaldo</span>
-                    </label>
-                </div>
-                <div class="mixi-flex">
-                    <div style="text-align: center;">
-                        <h4 id="wisePersonName"
-                            style="margin: 0 0 10px 0; color: #3498db; font-size: 1.2rem; font-weight: 800;">Bác Trương
-                            Anh Ngọc</h4>
-                        <img src="img/TAN.jpg" alt="Nhà thông thái" id="wiseImg"
-                            style="width: 140px; max-width: 100%; height: auto; max-height: 150px; object-fit: contain; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                    </div>
-                    <div class="mixi-content">
-                        <div id="wiseIcon" style="font-size: 2.5rem; margin-bottom: 10px;">🧙‍♂️</div>
-                        <div id="wiseMsg" style="font-weight: 700; color: #3498db;">Chọn nhà thông thái để hỏi</div>
-                        <div id="wiseResult" style="font-size: 1.1rem; color: #2c3e50; margin: 15px 0;"></div>
-                        <button id="startWiseBtn" onclick="confirmWise()"
-                            style="background: linear-gradient(135deg, #3498db, #2980b9); margin-top: 10px;">🧙 XIN TƯ
-                            VẤN</button>
-                        <button id="closeWiseBtn" onclick="closeModal('wiseModal')"
-                            style="display:none; background: linear-gradient(135deg, #27ae60, #2ecc71); margin-top: 15px; padding: 12px 25px; border-radius: 25px; font-weight: 800; font-size: 1rem; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);">
-                            ⚽ ĐÃ HIỂU, VÀO SÚT PEN!
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="prizeModal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <div class="mixi-flex">
-                    <img src="img/ando_mixi.jpg" alt="Khô gà đè tem" id="prizeImg"
-                        style="max-width: 300px; border-radius: 10px;">
-                    <div class="mixi-content">
-                        <div id="prizeTitle"
-                            style="font-size: 24px; font-weight: 800; color: #ff9f43; margin-bottom: 10px;">🍗 KHÔ GÀ ĐÈ
-                            TEM!</div>
-                        <div id="prizeMsg">Chúc mừng bạn đã nhận được phần quà đặc biệt từ Độ Mixi!</div>
-                        <button onclick="closeModal('prizeModal')">Tuyệt vời!</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="shotResultModal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <div style="font-size: 3rem; margin-bottom: 10px;">⚽</div>
-                <h2 id="shotResultTitle" style="color: #2c3e50; font-weight: 800;">KẾT THÚC TRẬN ĐẤU!</h2>
-                <div id="shotResultMsg" style="font-size: 1.2rem; margin: 20px 0; color: #34495e;"></div>
-                <div class="button-group" style="justify-content: center;">
-                    <button onclick="location.reload()" style="background: #95a5a6;">Chơi lại</button>
-                    <button id="openEnvelopesBtn" onclick="scrollToPrizes()" style="display:none;">Mở lì xì 🎁</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="finalPrizeModal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <div class="mixi-flex">
-                    <img src="img/ando_mixi.jpg" alt="Kết quả" style="width: 250px; border-radius: 15px;">
-                    <div class="mixi-content">
-                        <h2 style="color: #c0392b; font-weight: 800; margin-top: 0;">🎉 CHÚC MỪNG!</h2>
-                        <div id="finalPrizeMsg" style="font-size: 1.1rem; margin: 15px 0; line-height: 1.6;"></div>
-                        <div id="leaderboardRank"
-                            style="background: #f1c40f; color: #000; padding: 10px; border-radius: 10px; font-weight: 800; margin-bottom: 20px;">
-                        </div>
-                        <button onclick="location.reload()">Chơi lại trận mới</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="result"></div>
-
-        <div id="prizes" style="display:none;">
-            <h2 style="color:#fff; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">CHÚC MỪNG SIÊU SAO! 🎉</h2>
-            <p style="color:#fff;">Bạn đã ghi được ít nhất 6 bàn thắng. Hãy bốc thăm lì xì may mắn!</p>
-            <div class="envelope-container" id="envelopeContainer">
-            </div>
-        </div>
-
-    </div>
-    <!-- Penalty Notice Modal (Chống gian lận / Hết giờ / Trừ tim) -->
-    <div id="penaltyModal" class="modal" style="display: none;">
-        <div class="modal-content"
-            style="max-width: 450px; text-align: center; border: 3px solid #e74c3c; border-radius: 20px; padding: 25px;">
-            <div style="font-size: 3.5rem; margin-bottom: 5px;">💔</div>
-            <h3 id="penaltyTitle" style="color: #e74c3c; margin: 0 0 10px 0; font-size: 1.5rem; font-weight: 800;">THÔNG
-                BÁO BỊ TRỪ TIM!</h3>
-            <div id="penaltyMessage" style="font-size: 1.05rem; color: #2c3e50; margin: 15px 0; line-height: 1.5;">
-            </div>
-            <button class="start-game-btn" onclick="acknowledgePenalty()"
-                style="background: linear-gradient(135deg, #e74c3c, #c0392b); border-radius: 25px; padding: 12px 35px; margin-top: 10px; width: auto;">
-                EM ĐÃ RÕ ⚽
+    <!-- ================= INTRO OVERLAY (RONALDO SIUUU) ================= -->
+    <div id="introOverlay">
+        <div class="intro-container">
+            <span class="intro-title-tag">⚡ CR7 SPECIAL SIUUU!</span>
+            <button class="intro-skip-btn" onclick="finishIntro()">
+                <span>Bỏ qua</span>
+                <span>⏭️</span>
             </button>
+            <canvas id="introCanvas" width="1200" height="675"></canvas>
         </div>
     </div>
 
-    <!-- Âm thanh -->
-    <audio id="callAudio" src="music/call.mp3"></audio>
-    <audio id="callAudio_messi" src="music/messi.mp3"></audio>
+    <!-- Main Farewell Interface -->
+    <div class="closed-wrapper" id="mainWrapper">
+        <div class="closed-card">
+            
+            <!-- Badge -->
+            <div class="status-badge">
+                <span class="badge-dot"></span>
+                <span>Thông Báo Chính Thức • Official Sunset</span>
+            </div>
 
-    <audio id="wiseAudio" src="music/wise.mp3"></audio>
-    <audio id="wiseAudio_truongcon" src="music/truongconnd.mp3"></audio>
-    <audio id="wiseAudio_lukaku" src="music/LAKAKA.mp3"></audio>
-    <audio id="wiseAudio_cr7" src="music/win.mp3"></audio>
+            <!-- Icon Crest -->
+            <div>
+                <div class="crest-wrapper">
+                    <div class="crest-ring"></div>
+                    <div class="crest-bg">⚽</div>
+                </div>
+            </div>
 
-    <audio id="winAudio" src="music/win2.mp3"></audio>
-    <audio id="looseAudio" src="music/lose.mp3"></audio>
-    <audio id="goalAudio" src="music/win.mp3"></audio>
-    <audio id="saveAudio" src="music/gk.mp3"></audio>
+            <!-- Main Heading -->
+            <h1 class="main-title">GAME ĐÃ CHÍNH THỨC ĐÓNG CỬA</h1>
+            <p class="subtitle">Penalty Master • Hành trình bóng đá & lập trình Python khép lại</p>
 
-    <script src="script.js"></script>
+            <!-- Replay Ronaldo Animation Button -->
+            <div class="replay-bar">
+                <button class="btn-replay" onclick="replayIntro()">
+                    <span>⚡ Xem lại Ronaldo SIUUU!</span>
+                    <span>🔄</span>
+                </button>
+            </div>
+
+            <!-- Letter Card -->
+            <div class="letter-card" id="letterSection">
+                <div class="letter-header">
+                    <span>💌</span>
+                    <span>Thư Tri Ân Gửi Đến Toàn Thể Các Bạn Học Sinh</span>
+                </div>
+                <div class="letter-content">
+                    <p>
+                        Cảm ơn tất cả các bạn học sinh đã <span class="highlight-text">đồng hành và gắn bó với game suốt thời gian qua</span>.
+                    </p>
+                    <p>
+                        Từ những câu hỏi trắc nghiệm logic, các bài tập code Python thử thách cho đến những cú sút penalty kịch tính trên sân cỏ ảo – sự nhiệt tình, tiếng cười và tinh thần học hỏi không ngừng của các bạn đã tạo nên linh hồn và những kỷ niệm vô giá cho Penalty Master.
+                    </p>
+                    <p>
+                        <span class="highlight-bright">✨ Chúc các bạn luôn dồi dào sức khỏe, học tập thật tốt và có một tương lai luôn rạng rỡ, tươi sáng và gặt hái được nhiều thành công rực rỡ!</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Memory Highlights -->
+            <div class="memories-grid">
+                <div class="memory-item">
+                    <span class="memory-icon">🏆</span>
+                    <div class="memory-title">Đam Mê Sân Cỏ</div>
+                    <div class="memory-desc">Hàng trăm trận penalty nảy lửa cùng những pha bắt bóng xuất sắc và giây phút ăn mừng bùng nổ.</div>
+                </div>
+                <div class="memory-item">
+                    <span class="memory-icon">💡</span>
+                    <div class="memory-title">Học Mà Chơi</div>
+                    <div class="memory-desc">Biến những kiến thức lập trình Python tưởng chừng khô khan thành trải nghiệm giải trí bổ ích.</div>
+                </div>
+                <div class="memory-item">
+                    <span class="memory-icon">🌟</span>
+                    <div class="memory-title">Vững Bước Tương Lai</div>
+                    <div class="memory-desc">Hãy luôn giữ vững ngọn lửa nhiệt huyết, đam mê khám phá và chinh phục những ước mơ lớn!</div>
+                </div>
+            </div>
+
+            <!-- SOUNDBOARD SECTION -->
+            <div class="soundboard-section">
+                <div class="soundboard-header">
+                    <div class="soundboard-badge">
+                        <span>🎧</span>
+                        <span>Interactive Soundboard</span>
+                    </div>
+                    <div class="soundboard-title">
+                        <span>🎶 HỘP ÂM THANH KỶ NIỆM</span>
+                    </div>
+                    <p class="soundboard-desc">
+                        Bấm vào từng nút bên dưới để nghe lại những giai điệu, câu nói và âm thanh quen thuộc của các nhân vật trong game!
+                    </p>
+                </div>
+
+                <!-- Now Playing / Status Bar -->
+                <div class="now-playing-bar">
+                    <div class="now-playing-status">
+                        <div class="equalizer" id="soundEq" style="display: none;">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <span id="playingStatusText">Chưa có âm thanh nào đang phát</span>
+                    </div>
+                    <button class="stop-all-btn" onclick="stopAllSounds()">⏹️ Dừng tất cả</button>
+                </div>
+
+                <!-- Sound Buttons Grid -->
+                <div class="soundboard-grid">
+                    <!-- Sound 1: CR7 SIUUU -->
+                    <button class="sound-btn" id="btn-sound-win" onclick="playSound('win.mp3', 'btn-sound-win', '⚽ CR7 SIUUU! & Bàn Thắng')">
+                        <span class="s-icon">⚽</span>
+                        <span class="s-name">CR7 SIUUU!</span>
+                        <span class="s-tag">Vào lưới & Ăn mừng</span>
+                    </button>
+
+                    <!-- Sound 2: Victory Anthem -->
+                    <button class="sound-btn" id="btn-sound-win2" onclick="playSound('win2.mp3', 'btn-sound-win2', '🏆 Nhạc Khải Hoàn Chiến Thắng')">
+                        <span class="s-icon">🏆</span>
+                        <span class="s-name">Khải Hoàn Mở Quà</span>
+                        <span class="s-tag">Giai điệu chiến thắng</span>
+                    </button>
+
+                    <!-- Sound 3: GOAT Messi -->
+                    <button class="sound-btn" id="btn-sound-messi" onclick="playSound('messi.mp3', 'btn-sound-messi', '🐐 GOAT Messi Trợ Giúp')">
+                        <span class="s-icon">🐐</span>
+                        <span class="s-name">GOAT Messi</span>
+                        <span class="s-tag">Cầu cứu GOAT</span>
+                    </button>
+
+                    <!-- Sound 4: Độ Mixi -->
+                    <button class="sound-btn" id="btn-sound-call" onclick="playSound('call.mp3', 'btn-sound-call', '📞 Anh Độ Mixi Gọi Điện')">
+                        <span class="s-icon">📱</span>
+                        <span class="s-name">Anh Độ Mixi</span>
+                        <span class="s-tag">Trợ giúp gọi điện</span>
+                    </button>
+
+                    <!-- Sound 5: Trường Con Nam Định -->
+                    <button class="sound-btn" id="btn-sound-truongcon" onclick="playSound('truongconnd.mp3', 'btn-sound-truongcon', '🦅 Bác Trường Con Nam Định')">
+                        <span class="s-icon">🦅</span>
+                        <span class="s-name">Trường Con NĐ</span>
+                        <span class="s-tag">Nhà thông thái uy tín</span>
+                    </button>
+
+                    <!-- Sound 6: Lakaka Lukaku -->
+                    <button class="sound-btn" id="btn-sound-lakaka" onclick="playSound('LAKAKA.mp3', 'btn-sound-lakaka', '🧱 Lukaku LAKAKA')">
+                        <span class="s-icon">🧱</span>
+                        <span class="s-name">Romelu Lukaku</span>
+                        <span class="s-tag">Sound LAKAKA</span>
+                    </button>
+
+                    <!-- Sound 7: Nhà thông thái Trương Anh Ngọc -->
+                    <button class="sound-btn" id="btn-sound-wise" onclick="playSound('wise.mp3', 'btn-sound-wise', '🧙 Bác Trương Anh Ngọc Tư Vấn')">
+                        <span class="s-icon">🧙‍♂️</span>
+                        <span class="s-name">Trương Anh Ngọc</span>
+                        <span class="s-tag">Nhà thông thái</span>
+                    </button>
+
+                    <!-- Sound 8: Thủ môn cản phá -->
+                    <button class="sound-btn" id="btn-sound-gk" onclick="playSound('gk.mp3', 'btn-sound-gk', '🧤 Thủ Môn Bay Người Cứu Thua')">
+                        <span class="s-icon">🧤</span>
+                        <span class="s-name">Thủ Môn Cản Phá</span>
+                        <span class="s-tag">Âm thanh đẩy bóng</span>
+                    </button>
+
+                    <!-- Sound 9: Thất bại / Tiếng còi -->
+                    <button class="sound-btn" id="btn-sound-lose" onclick="playSound('lose.mp3', 'btn-sound-lose', '💔 Tiếng Còi & Nhạc Hết Giờ')">
+                        <span class="s-icon">💔</span>
+                        <span class="s-name">Thất Bại / Hết Giờ</span>
+                        <span class="s-tag">Kỷ niệm thua trận</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer & Signature -->
+            <div class="farewell-footer">
+                <p class="quote-text">
+                    “Mỗi chặng đường khép lại sẽ mở ra những hành trình mới tươi đẹp hơn. Cảm ơn các bạn vì đã là một phần tuyệt vời nhất của Penalty Master!”
+                </p>
+                <div class="signature">
+                    <span>⚽ BAN QUẢN TRỊ PENALTY MASTER ❤️</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Fixed Floating Breathing Scroll Indicator -->
+    <div class="fixed-scroll-indicator hidden" id="fixedScrollIndicator" onclick="scrollToLetter()">
+        <div class="mouse-icon">
+            <div class="mouse-wheel"></div>
+        </div>
+        <span class="scroll-text">Cuộn xuống để xem tiếp</span>
+        <div class="chevrons-down">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Audio for CR7 Intro SIUUU -->
+    <audio id="introSiuuAudio" src="music/win.mp3"></audio>
+
+    <!-- Canvas Floating Stars & Background Particles -->
+    <script>
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        let bgW = (bgCanvas.width = window.innerWidth);
+        let bgH = (bgCanvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+            bgW = bgCanvas.width = window.innerWidth;
+            bgH = bgCanvas.height = window.innerHeight;
+        });
+
+        const bgParticles = [];
+        const bgParticleCount = Math.min(65, Math.floor(window.innerWidth / 18));
+
+        class StarParticle {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * bgW;
+                this.y = initial ? Math.random() * bgH : bgH + 15;
+                this.size = Math.random() * 2.8 + 0.8;
+                this.speedY = Math.random() * 0.45 + 0.15;
+                this.speedX = (Math.random() - 0.5) * 0.25;
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.maxAlpha = this.alpha;
+                this.pulseSpeed = Math.random() * 0.02 + 0.01;
+                this.pulse = Math.random() * Math.PI;
+                this.isGold = Math.random() > 0.4;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                this.pulse += this.pulseSpeed;
+
+                if (this.y < -15 || this.x < -15 || this.x > bgW + 15) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                const currentAlpha = Math.max(0.05, (Math.sin(this.pulse) * 0.5 + 0.5) * this.maxAlpha);
+                bgCtx.save();
+                bgCtx.globalAlpha = currentAlpha;
+                bgCtx.fillStyle = this.isGold ? '#ffd15c' : '#ffffff';
+                bgCtx.shadowColor = this.isGold ? '#ffb300' : '#38bdf8';
+                bgCtx.shadowBlur = this.size * 3;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+                bgCtx.restore();
+            }
+        }
+
+        for (let i = 0; i < bgParticleCount; i++) {
+            bgParticles.push(new StarParticle());
+        }
+
+        function animateBackground() {
+            bgCtx.clearRect(0, 0, bgW, bgH);
+
+            for (let i = 0; i < bgParticles.length; i++) {
+                bgParticles[i].update();
+                bgParticles[i].draw();
+            }
+
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        // ================= RONALDO SIUUU ANIMATION ENGINE =================
+        const introOverlay = document.getElementById('introOverlay');
+        const mainWrapper = document.getElementById('mainWrapper');
+        const introCanvas = document.getElementById('introCanvas');
+        const introCtx = introCanvas.getContext('2d');
+        const siuuAudio = document.getElementById('introSiuuAudio');
+
+        const dpr = window.devicePixelRatio || 1;
+        let cw = 1200;
+        let ch = 675;
+
+        function resizeIntro() {
+            const rect = introCanvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                introCanvas.width = rect.width * dpr;
+                introCanvas.height = rect.height * dpr;
+                introCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                cw = rect.width;
+                ch = rect.height;
+            }
+        }
+        window.addEventListener('resize', resizeIntro);
+        setTimeout(resizeIntro, 50);
+
+        let introAnimTime = 0;
+        let introLastTimestamp = performance.now();
+        let introHasPlayedAudio = false;
+        let introFinished = false;
+        let introParticles = [];
+        let introShockwaves = [];
+        let introNetBulge = 0;
+        let introAnimationId = null;
+
+        function addGoalParticles(x, y) {
+            for (let i = 0; i < 45; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 3 + Math.random() * 9;
+                introParticles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    color: Math.random() > 0.4 ? '#ffd15c' : '#ffffff',
+                    size: 3 + Math.random() * 6,
+                    alpha: 1
+                });
+            }
+        }
+
+        function addLandingShockwave(x, y) {
+            introShockwaves.push({ x: x, y: y, radius: 10, maxRadius: 180, alpha: 1 });
+            for (let i = 0; i < 60; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 4 + Math.random() * 12;
+                introParticles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed * 0.4 - 1,
+                    color: Math.random() > 0.3 ? '#ffd15c' : '#f43f5e',
+                    size: 4 + Math.random() * 7,
+                    alpha: 1
+                });
+            }
+        }
+
+        // Draw Stadium on Intro Canvas
+        function drawStadium() {
+            const grad = introCtx.createLinearGradient(0, 0, 0, ch);
+            grad.addColorStop(0, '#0c2e19');
+            grad.addColorStop(0.45, '#164d2b');
+            grad.addColorStop(1, '#082413');
+            introCtx.fillStyle = grad;
+            introCtx.fillRect(0, 0, cw, ch);
+
+            // Light Glow
+            introCtx.save();
+            introCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            introCtx.beginPath();
+            introCtx.arc(cw * 0.2, -50, 260, 0, Math.PI * 2);
+            introCtx.arc(cw * 0.8, -50, 260, 0, Math.PI * 2);
+            introCtx.fill();
+            introCtx.restore();
+
+            // Grass stripes
+            const stripeWidth = cw / 12;
+            for (let i = 0; i < 12; i++) {
+                if (i % 2 === 0) {
+                    introCtx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+                    introCtx.fillRect(i * stripeWidth, 0, stripeWidth, ch);
+                }
+            }
+
+            // Field Lines & Penalty box
+            introCtx.save();
+            introCtx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
+            introCtx.lineWidth = 3;
+            introCtx.strokeRect(cw * 0.08, ch * 0.22, cw * 0.84, ch * 0.7);
+
+            // Goal post on the right
+            const goalX = cw * 0.82;
+            const goalY = ch * 0.26;
+            const goalW = cw * 0.12;
+            const goalH = ch * 0.36;
+
+            // Net Mesh
+            introCtx.save();
+            introCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            introCtx.fillRect(goalX, goalY, goalW, goalH);
+            introCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+            introCtx.lineWidth = 1.2;
+
+            for (let gx = goalX; gx <= goalX + goalW; gx += 12) {
+                introCtx.beginPath();
+                const offsetX = (gx > goalX + goalW * 0.4) ? introNetBulge * 15 : 0;
+                introCtx.moveTo(gx + offsetX, goalY);
+                introCtx.lineTo(gx + offsetX, goalY + goalH);
+                introCtx.stroke();
+            }
+            for (let gy = goalY; gy <= goalY + goalH; gy += 12) {
+                introCtx.beginPath();
+                introCtx.moveTo(goalX, gy);
+                introCtx.lineTo(goalX + goalW + introNetBulge * 15, gy);
+                introCtx.stroke();
+            }
+            introCtx.restore();
+
+            // Goal Frame
+            introCtx.strokeStyle = '#ffffff';
+            introCtx.lineWidth = 7;
+            introCtx.strokeRect(goalX, goalY, goalW, goalH);
+
+            // Penalty spot
+            introCtx.fillStyle = '#ffffff';
+            introCtx.beginPath();
+            introCtx.arc(cw * 0.35, ch * 0.68, 6, 0, Math.PI * 2);
+            introCtx.fill();
+
+            introCtx.restore();
+        }
+
+        // Draw CR7 Model
+        function drawCR7HumanoidRealistic(x, y, scale, pose, param = 0) {
+            introCtx.save();
+            introCtx.translate(x, y);
+            introCtx.scale(scale, scale);
+
+            const skin = '#e2a374';
+            const skinShadow = '#c28356';
+            const hair = '#1a1614';
+            const kitWhite = '#ffffff';
+            const kitGold = '#ffd15c';
+            const shortsColor = '#ffffff';
+            const socksColor = '#ffffff';
+            const bootColor = '#f43f5e'; // Red Nike boots
+
+            if (pose !== 'jump') {
+                introCtx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+                introCtx.beginPath();
+                introCtx.ellipse(0, 16, 42, 11, 0, 0, Math.PI * 2);
+                introCtx.fill();
+            }
+
+            function drawBone(x1, y1, x2, y2, w1, w2, color) {
+                introCtx.save();
+                introCtx.fillStyle = color;
+                introCtx.strokeStyle = color;
+                introCtx.lineWidth = Math.min(w1, w2);
+                introCtx.lineCap = 'round';
+
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const perp = angle + Math.PI / 2;
+
+                introCtx.beginPath();
+                introCtx.moveTo(x1 + Math.cos(perp) * (w1 / 2), y1 + Math.sin(perp) * (w1 / 2));
+                introCtx.lineTo(x2 + Math.cos(perp) * (w2 / 2), y2 + Math.sin(perp) * (w2 / 2));
+                introCtx.lineTo(x2 - Math.cos(perp) * (w2 / 2), y2 - Math.sin(perp) * (w2 / 2));
+                introCtx.lineTo(x1 - Math.cos(perp) * (w1 / 2), y1 - Math.sin(perp) * (w1 / 2));
+                introCtx.closePath();
+                introCtx.fill();
+
+                introCtx.beginPath(); introCtx.arc(x1, y1, w1 / 2, 0, Math.PI * 2); introCtx.fill();
+                introCtx.beginPath(); introCtx.arc(x2, y2, w2 / 2, 0, Math.PI * 2); introCtx.fill();
+                introCtx.restore();
+            }
+
+            function drawHead(hx, hy, headAngle = 0, openMouth = false) {
+                introCtx.save();
+                introCtx.translate(hx, hy);
+                introCtx.rotate(headAngle);
+
+                introCtx.fillStyle = skin;
+                introCtx.beginPath();
+                introCtx.ellipse(0, 0, 14, 17, 0, 0, Math.PI * 2);
+                introCtx.fill();
+
+                introCtx.fillStyle = skinShadow;
+                introCtx.beginPath(); introCtx.arc(-13, 0, 4, 0, Math.PI * 2); introCtx.fill();
+
+                // Hair
+                introCtx.fillStyle = hair;
+                introCtx.beginPath();
+                introCtx.ellipse(0, -7, 15, 12, 0, Math.PI, Math.PI * 2);
+                introCtx.fill();
+                introCtx.fillRect(-14, -14, 28, 9);
+
+                introCtx.fillStyle = '#222';
+                introCtx.fillRect(2, -4, 4, 2);
+                introCtx.fillStyle = hair;
+                introCtx.fillRect(0, -8, 8, 2);
+
+                if (openMouth) {
+                    introCtx.fillStyle = '#600';
+                    introCtx.beginPath(); introCtx.ellipse(4, 5, 5, 7, 0, 0, Math.PI * 2); introCtx.fill();
+                    introCtx.fillStyle = '#fff';
+                    introCtx.fillRect(2, 0, 4, 2);
+                }
+                introCtx.restore();
+            }
+
+            if (pose === 'run') {
+                const t = introAnimTime * 14;
+                const stride = Math.sin(t);
+                const bob = Math.abs(Math.sin(t * 2)) * 6;
+
+                introCtx.translate(0, -bob);
+                introCtx.rotate(-0.15);
+
+                // Left Leg
+                const lHipX = -6, lHipY = -35;
+                const lKneeX = lHipX + Math.sin(-stride) * 22;
+                const lKneeY = lHipY + Math.cos(-stride) * 24;
+                const lAnkleX = lKneeX - Math.sin(-stride + 0.6) * 20;
+                const lAnkleY = lKneeY + Math.cos(-stride + 0.6) * 20;
+
+                drawBone(lHipX, lHipY, lKneeX, lKneeY, 14, 11, shortsColor);
+                drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 11, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(lAnkleX - 4, lAnkleY + 4, 10, 5, -0.2, 0, Math.PI * 2); introCtx.fill();
+
+                // Right Leg
+                const rHipX = 6, rHipY = -35;
+                const rKneeX = rHipX + Math.sin(stride) * 22;
+                const rKneeY = rHipY + Math.cos(stride) * 24;
+                const rAnkleX = rKneeX + Math.sin(stride + 0.3) * 20;
+                const rAnkleY = rKneeY + Math.cos(stride + 0.3) * 20;
+
+                drawBone(rHipX, rHipY, rKneeX, rKneeY, 14, 11, shortsColor);
+                drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 11, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(rAnkleX + 4, rAnkleY + 4, 10, 5, 0.2, 0, Math.PI * 2); introCtx.fill();
+
+                // Torso
+                introCtx.fillStyle = kitWhite;
+                introCtx.beginPath();
+                introCtx.moveTo(-16, -75); introCtx.lineTo(16, -75);
+                introCtx.lineTo(12, -35); introCtx.lineTo(-12, -35);
+                introCtx.closePath(); introCtx.fill();
+
+                introCtx.fillStyle = kitGold;
+                introCtx.fillRect(-14, -75, 28, 5);
+                introCtx.font = '900 20px Outfit, sans-serif';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -48);
+
+                const armSwing = Math.sin(t);
+                drawBone(-16, -70, -26 + armSwing * 16, -45, 9, 7, skin);
+                drawBone(16, -70, 26 - armSwing * 16, -45, 9, 7, skin);
+                drawHead(0, -90, 0.05);
+
+            } else if (pose === 'kick') {
+                const kickProg = Math.min(1, param);
+                introCtx.rotate(0.2);
+
+                const lHipX = -8, lHipY = -35;
+                const lKneeX = -18, lKneeY = -10;
+                const lAnkleX = -20, lAnkleY = 15;
+                drawBone(lHipX, lHipY, lKneeX, lKneeY, 14, 11, shortsColor);
+                drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 11, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(lAnkleX - 4, lAnkleY + 4, 11, 6, -0.3, 0, Math.PI * 2); introCtx.fill();
+
+                const rHipX = 6, rHipY = -35;
+                const kickAngle = -0.4 - kickProg * 1.2;
+                const rKneeX = rHipX + Math.cos(kickAngle) * 28;
+                const rKneeY = rHipY + Math.sin(kickAngle) * 28;
+                const rAnkleX = rKneeX + Math.cos(kickAngle + 0.3) * 26;
+                const rAnkleY = rKneeY + Math.sin(kickAngle + 0.3) * 26;
+
+                drawBone(rHipX, rHipY, rKneeX, rKneeY, 14, 11, shortsColor);
+                drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 11, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(rAnkleX + 6, rAnkleY, 12, 6, kickAngle, 0, Math.PI * 2); introCtx.fill();
+
+                introCtx.fillStyle = kitWhite;
+                introCtx.beginPath();
+                introCtx.moveTo(-16, -75); introCtx.lineTo(16, -75);
+                introCtx.lineTo(12, -35); introCtx.lineTo(-12, -35);
+                introCtx.closePath(); introCtx.fill();
+
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 20px Outfit, sans-serif';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -48);
+
+                drawBone(-16, -70, -42, -60, 9, 7, skin);
+                drawBone(16, -70, 42, -50, 9, 7, skin);
+                drawHead(4, -90, -0.15);
+
+            } else if (pose === 'jump') {
+                const spinAngle = param;
+                const scaleX = Math.cos(spinAngle);
+                introCtx.scale(scaleX, 1);
+
+                drawBone(-10, -35, -15, -10, 13, 10, shortsColor);
+                drawBone(-15, -10, -18, 12, 10, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(-18, 16, 9, 5, 0, 0, Math.PI * 2); introCtx.fill();
+
+                drawBone(10, -35, 15, -10, 13, 10, shortsColor);
+                drawBone(15, -10, 18, 12, 10, 8, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(18, 16, 9, 5, 0, 0, Math.PI * 2); introCtx.fill();
+
+                introCtx.fillStyle = kitWhite;
+                introCtx.fillRect(-16, -75, 32, 42);
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 20px Outfit, sans-serif';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -50);
+
+                drawBone(-16, -70, -28, -105, 9, 7, skin);
+                drawBone(16, -70, 28, -105, 9, 7, skin);
+                drawHead(0, -92, 0);
+
+            } else if (pose === 'siuu') {
+                const lHipX = -10, lHipY = -35;
+                const lKneeX = -28, lKneeY = -12;
+                const lAnkleX = -32, lAnkleY = 16;
+
+                drawBone(lHipX, lHipY, lKneeX, lKneeY, 15, 12, shortsColor);
+                drawBone(lKneeX, lKneeY, lAnkleX, lAnkleY, 12, 9, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(lAnkleX - 6, lAnkleY + 3, 14, 7, -0.2, 0, Math.PI * 2); introCtx.fill();
+
+                const rHipX = 10, rHipY = -35;
+                const rKneeX = 28, rKneeY = -12;
+                const rAnkleX = 32, rAnkleY = 16;
+
+                drawBone(rHipX, rHipY, rKneeX, rKneeY, 15, 12, shortsColor);
+                drawBone(rKneeX, rKneeY, rAnkleX, rAnkleY, 12, 9, socksColor);
+                introCtx.fillStyle = bootColor;
+                introCtx.beginPath(); introCtx.ellipse(rAnkleX + 6, rAnkleY + 3, 14, 7, 0.2, 0, Math.PI * 2); introCtx.fill();
+
+                introCtx.fillStyle = shortsColor;
+                introCtx.fillRect(-22, -42, 44, 20);
+
+                introCtx.fillStyle = kitWhite;
+                introCtx.beginPath();
+                introCtx.moveTo(-18, -82); introCtx.lineTo(18, -82);
+                introCtx.lineTo(14, -38); introCtx.lineTo(-14, -38);
+                introCtx.closePath(); introCtx.fill();
+
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 22px Outfit, sans-serif';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -52);
+
+                drawBone(-16, -76, -50, -32, 10, 8, skin);
+                drawBone(16, -76, 50, -32, 10, 8, skin);
+
+                introCtx.fillStyle = skin;
+                introCtx.beginPath(); introCtx.arc(-52, -30, 6, 0, Math.PI * 2); introCtx.fill();
+                introCtx.beginPath(); introCtx.arc(52, -30, 6, 0, Math.PI * 2); introCtx.fill();
+
+                drawHead(0, -98, -0.12, true);
+            }
+
+            introCtx.restore();
+        }
+
+        // Intro Loop
+        function animateIntro(now) {
+            if (introFinished) return;
+
+            const delta = (now - introLastTimestamp) / 1000;
+            introLastTimestamp = now;
+
+            introAnimTime += delta;
+            const cycle = introAnimTime;
+
+            drawStadium();
+
+            // Shockwaves
+            for (let i = introShockwaves.length - 1; i >= 0; i--) {
+                const sw = introShockwaves[i];
+                sw.radius += delta * 340;
+                sw.alpha -= delta * 1.4;
+                if (sw.alpha <= 0) {
+                    introShockwaves.splice(i, 1);
+                    continue;
+                }
+                introCtx.save();
+                introCtx.strokeStyle = `rgba(255, 209, 92, ${sw.alpha})`;
+                introCtx.lineWidth = 6;
+                introCtx.beginPath();
+                introCtx.ellipse(sw.x, sw.y, sw.radius, sw.radius * 0.35, 0, 0, Math.PI * 2);
+                introCtx.stroke();
+                introCtx.restore();
+            }
+
+            // Particles
+            for (let i = introParticles.length - 1; i >= 0; i--) {
+                const p = introParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.22;
+                p.alpha -= delta * 1.1;
+                if (p.alpha <= 0) {
+                    introParticles.splice(i, 1);
+                    continue;
+                }
+                introCtx.save();
+                introCtx.globalAlpha = Math.max(0, p.alpha);
+                introCtx.fillStyle = p.color;
+                introCtx.beginPath();
+                introCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                introCtx.fill();
+                introCtx.restore();
+            }
+
+            if (introNetBulge > 0) {
+                introNetBulge = Math.max(0, introNetBulge - delta * 2);
+            }
+
+            // Stages
+            if (cycle < 2.0) {
+                // Stage 1: Run & Penalty Kick
+                const progress = cycle / 2.0;
+                const cr7X = cw * 0.14 + progress * (cw * 0.22);
+                const cr7Y = ch * 0.68;
+
+                let ballX = cw * 0.35;
+                let ballY = ch * 0.68;
+                let ballRot = cycle * 12;
+
+                if (progress < 0.82) {
+                    drawCR7HumanoidRealistic(cr7X, cr7Y, 1.15, 'run');
+                } else {
+                    const kickProg = (progress - 0.82) / 0.18;
+                    drawCR7HumanoidRealistic(cr7X + 12, cr7Y, 1.15, 'kick', kickProg);
+
+                    const ballFlyProg = kickProg;
+                    ballX = cw * 0.35 + ballFlyProg * (cw * 0.49);
+                    ballY = ch * 0.68 - ballFlyProg * (ch * 0.35);
+                    ballRot = cycle * 35;
+
+                    if (ballFlyProg >= 0.9 && introParticles.length === 0) {
+                        introNetBulge = 1;
+                        addGoalParticles(cw * 0.84, ch * 0.33);
+                    }
+                }
+
+                // Ball
+                introCtx.save();
+                if (progress >= 0.82) {
+                    introCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    introCtx.lineWidth = 14;
+                    introCtx.lineCap = 'round';
+                    introCtx.beginPath();
+                    introCtx.moveTo(cw * 0.35, ch * 0.68);
+                    introCtx.lineTo(ballX, ballY);
+                    introCtx.stroke();
+                }
+
+                introCtx.translate(ballX, ballY);
+                introCtx.rotate(ballRot);
+                introCtx.fillStyle = '#ffffff';
+                introCtx.beginPath(); introCtx.arc(0, 0, 13, 0, Math.PI * 2); introCtx.fill();
+                introCtx.strokeStyle = '#111111'; introCtx.lineWidth = 2.5; introCtx.stroke();
+                introCtx.fillStyle = '#111111';
+                introCtx.beginPath(); introCtx.arc(0, 0, 5, 0, Math.PI * 2); introCtx.fill();
+                introCtx.restore();
+
+            } else if (cycle < 3.7) {
+                // Stage 2: Jump & 360 Spin
+                const stageProgress = (cycle - 2.0) / 1.7;
+                const cr7X = cw * 0.36 + stageProgress * (cw * 0.14);
+
+                if (stageProgress < 0.28) {
+                    drawCR7HumanoidRealistic(cr7X, ch * 0.68, 1.22, 'run');
+                } else {
+                    const jumpProg = (stageProgress - 0.28) / 0.72;
+                    const jumpY = ch * 0.68 - Math.sin(jumpProg * Math.PI) * 170;
+                    const spinAngle = jumpProg * Math.PI * 2;
+
+                    drawCR7HumanoidRealistic(cr7X, jumpY, 1.28, 'jump', spinAngle);
+
+                    if (jumpProg >= 0.94 && introShockwaves.length === 0) {
+                        addLandingShockwave(cw * 0.5, ch * 0.68);
+                        if (!introHasPlayedAudio) {
+                            introHasPlayedAudio = true;
+                            if (siuuAudio) {
+                                siuuAudio.currentTime = 0;
+                                siuuAudio.play().catch(() => {});
+                            }
+                        }
+                    }
+                }
+
+            } else if (cycle < 5.4) {
+                // Stage 3: Iconic SIUUU landing & Golden Burst
+                const cr7X = cw * 0.5;
+                const cr7Y = ch * 0.68;
+
+                if (introShockwaves.length === 0 && cycle < 4.0) {
+                    addLandingShockwave(cr7X, cr7Y);
+                }
+
+                drawCR7HumanoidRealistic(cr7X, cr7Y, 1.35, 'siuu');
+
+                // SIUUU Text Burst
+                introCtx.save();
+                introCtx.textAlign = 'center';
+                introCtx.font = '900 68px Outfit, sans-serif';
+                introCtx.shadowColor = '#ffd15c';
+                introCtx.shadowBlur = 35;
+                introCtx.fillStyle = '#ffffff';
+                introCtx.strokeStyle = '#ffd15c';
+                introCtx.lineWidth = 4;
+                introCtx.strokeText('SIUUU! ⚽', cr7X, ch * 0.3);
+                introCtx.fillText('SIUUU! ⚽', cr7X, ch * 0.3);
+                introCtx.restore();
+
+            } else {
+                // Automatically transition to Farewell Dashboard
+                finishIntro();
+                return;
+            }
+
+            introAnimationId = requestAnimationFrame(animateIntro);
+        }
+
+        // Start Intro Animation on Load
+        introAnimationId = requestAnimationFrame(animateIntro);
+
+        const fixedScrollIndicator = document.getElementById('fixedScrollIndicator');
+
+        function finishIntro() {
+            introFinished = true;
+            if (introAnimationId) cancelAnimationFrame(introAnimationId);
+            introOverlay.classList.add('fade-out');
+            mainWrapper.classList.add('visible');
+            if (fixedScrollIndicator) {
+                setTimeout(() => {
+                    fixedScrollIndicator.classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        function replayIntro() {
+            stopAllSounds();
+            introFinished = false;
+            introAnimTime = 0;
+            introLastTimestamp = performance.now();
+            introHasPlayedAudio = false;
+            introParticles = [];
+            introShockwaves = [];
+            introNetBulge = 0;
+
+            if (fixedScrollIndicator) fixedScrollIndicator.classList.add('hidden');
+            introOverlay.classList.remove('fade-out');
+            mainWrapper.classList.remove('visible');
+
+            resizeIntro();
+            introAnimationId = requestAnimationFrame(animateIntro);
+        }
+
+        function scrollToLetter() {
+            const letterSection = document.getElementById('letterSection');
+            if (letterSection) {
+                letterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Tự động ẩn thanh scroll indicator khi đã cuộn xuống và hiện lại khi cuộn lên đầu
+        window.addEventListener('scroll', () => {
+            if (!fixedScrollIndicator || !mainWrapper.classList.contains('visible')) return;
+            if (window.scrollY > 200) {
+                fixedScrollIndicator.classList.add('hidden');
+            } else {
+                fixedScrollIndicator.classList.remove('hidden');
+            }
+        });
+
+        // ================= SOUNDBOARD AUDIO CONTROLLER =================
+        let currentAudio = null;
+        let currentBtnId = null;
+        const statusText = document.getElementById('playingStatusText');
+        const soundEq = document.getElementById('soundEq');
+
+        function playSound(file, btnId, title) {
+            if (currentAudio && currentBtnId === btnId) {
+                stopAllSounds();
+                return;
+            }
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+
+            document.querySelectorAll('.sound-btn').forEach(btn => btn.classList.remove('playing'));
+
+            const audioPath = 'music/' + file;
+            currentAudio = new Audio(audioPath);
+            currentBtnId = btnId;
+
+            const targetBtn = document.getElementById(btnId);
+            if (targetBtn) {
+                targetBtn.classList.add('playing');
+            }
+
+            soundEq.style.display = 'inline-flex';
+            statusText.innerHTML = `Đang phát: <strong>${title}</strong>`;
+
+            currentAudio.play().catch(e => {
+                console.log('Playback error:', e);
+                statusText.innerText = 'Không thể phát âm thanh này.';
+            });
+
+            currentAudio.onended = () => {
+                if (targetBtn) targetBtn.classList.remove('playing');
+                soundEq.style.display = 'none';
+                statusText.innerText = 'Đã phát xong: ' + title;
+                currentAudio = null;
+                currentBtnId = null;
+            };
+        }
+
+        function stopAllSounds() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (currentBtnId) {
+                const prevBtn = document.getElementById(currentBtnId);
+                if (prevBtn) prevBtn.classList.remove('playing');
+                currentBtnId = null;
+            }
+            soundEq.style.display = 'none';
+            statusText.innerText = 'Đã dừng tất cả âm thanh.';
+        }
+    </script>
 </body>
 
 </html>
