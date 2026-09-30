@@ -160,7 +160,7 @@ let currentQuestion = 0;
 let score = 0;
 let lives = 3;
 let shooting = false;
-let helps = { call: false, wise: false };
+let helps = { call: false, wise: false, fifty: false };
 let playerName = "L";
 let playerNumber = "22";
 let consecutiveCorrect = 0;
@@ -226,13 +226,92 @@ let player = {
     name: 'NIÊN BÉO', number: '10', hairStyle: 0
 };
 
+let gameWeather = 'day';
+let rainParticles = [];
+let gameFlares = [];
+let gameConfetti = [];
+
+for (let i = 0; i < 60; i++) {
+    rainParticles.push({
+        x: Math.random() * cw,
+        y: Math.random() * ch,
+        l: 10 + Math.random() * 10,
+        s: 12 + Math.random() * 6
+    });
+}
+
+function setGameWeather(mode) {
+    gameWeather = mode;
+    document.querySelectorAll('.weather-pill').forEach(p => p.classList.remove('active'));
+    const btn = document.getElementById('wpill-' + mode);
+    if (btn) btn.classList.add('active');
+
+    if (mode === 'flare') {
+        triggerGameFlares();
+    }
+}
+
+function triggerGameFlares() {
+    for (let i = 0; i < 40; i++) {
+        gameFlares.push({
+            x: Math.random() < 0.5 ? Math.random() * 120 : cw - 120 + Math.random() * 120,
+            y: 40 + Math.random() * 80,
+            vx: (Math.random() - 0.5) * 3,
+            vy: -Math.random() * 4 - 1,
+            color: Math.random() > 0.5 ? '#f43f5e' : '#ffd15c',
+            size: 3 + Math.random() * 5,
+            alpha: 1
+        });
+    }
+    for (let i = 0; i < 35; i++) {
+        gameConfetti.push({
+            x: Math.random() * cw,
+            y: -10,
+            vx: (Math.random() - 0.5) * 2,
+            vy: 2 + Math.random() * 3,
+            rot: Math.random() * Math.PI,
+            color: ['#f43f5e', '#ffd15c', '#38bdf8', '#2ecc71', '#9b59b6'][Math.floor(Math.random() * 5)],
+            w: 6 + Math.random() * 4,
+            h: 4 + Math.random() * 3
+        });
+    }
+}
+
 function drawField() {
-    // Pitch
-    const grad = ctx.createLinearGradient(0, ch, 0, 150);
-    grad.addColorStop(0, '#1e8449');
-    grad.addColorStop(1, '#2ecc71');
-    ctx.fillStyle = grad;
+    // Pitch Background according to weather
+    if (gameWeather === 'night') {
+        const grad = ctx.createLinearGradient(0, ch, 0, 150);
+        grad.addColorStop(0, '#0c2e19');
+        grad.addColorStop(1, '#164d2b');
+        ctx.fillStyle = grad;
+    } else if (gameWeather === 'rain') {
+        const grad = ctx.createLinearGradient(0, ch, 0, 150);
+        grad.addColorStop(0, '#103923');
+        grad.addColorStop(1, '#1a4e32');
+        ctx.fillStyle = grad;
+    } else if (gameWeather === 'flare') {
+        const grad = ctx.createLinearGradient(0, ch, 0, 150);
+        grad.addColorStop(0, '#2e121a');
+        grad.addColorStop(1, '#1b4d2e');
+        ctx.fillStyle = grad;
+    } else {
+        const grad = ctx.createLinearGradient(0, ch, 0, 150);
+        grad.addColorStop(0, '#1e8449');
+        grad.addColorStop(1, '#2ecc71');
+        ctx.fillStyle = grad;
+    }
     ctx.fillRect(0, 0, cw, ch);
+
+    // Floodlight beams in Night / Flare mode
+    if (gameWeather === 'night' || gameWeather === 'flare') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath();
+        ctx.moveTo(60, 0); ctx.lineTo(0, ch); ctx.lineTo(250, ch); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cw - 60, 0); ctx.lineTo(cw - 250, ch); ctx.lineTo(cw, ch); ctx.closePath(); ctx.fill();
+        ctx.restore();
+    }
 
     // Markings
     ctx.strokeStyle = 'rgba(255,255,255,0.4)';
@@ -295,11 +374,52 @@ function drawField() {
             ctx.shadowBlur = 0;
         }
     }
-    if (isPowerShot) {
-        ctx.fillStyle = '#ff4500';
-        ctx.font = '900 12px Outfit';
-        ctx.fillText("🔥 SẴN SÀNG!", 20, 102);
+    // Rain particle rendering
+    if (gameWeather === 'rain') {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(200, 230, 255, 0.6)';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < rainParticles.length; i++) {
+            const rp = rainParticles[i];
+            ctx.beginPath();
+            ctx.moveTo(rp.x, rp.y);
+            ctx.lineTo(rp.x - 3, rp.y + rp.l);
+            ctx.stroke();
+            rp.y += rp.s;
+            rp.x -= 1;
+            if (rp.y > ch) { rp.y = -10; rp.x = Math.random() * cw; }
+        }
+        ctx.restore();
     }
+
+    // Flares & Confetti rendering
+    for (let i = gameFlares.length - 1; i >= 0; i--) {
+        const f = gameFlares[i];
+        f.x += f.vx; f.y += f.vy; f.alpha -= 0.02;
+        if (f.alpha <= 0) { gameFlares.splice(i, 1); continue; }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, f.alpha);
+        ctx.fillStyle = f.color;
+        ctx.shadowColor = f.color;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    for (let i = gameConfetti.length - 1; i >= 0; i--) {
+        const cf = gameConfetti[i];
+        cf.y += cf.vy; cf.x += cf.vx; cf.rot += 0.04;
+        if (cf.y > ch + 10) { gameConfetti.splice(i, 1); continue; }
+        ctx.save();
+        ctx.translate(cf.x, cf.y);
+        ctx.rotate(cf.rot);
+        ctx.fillStyle = cf.color;
+        ctx.fillRect(-cf.w / 2, -cf.h / 2, cf.w, cf.h);
+        ctx.restore();
+    }
+
     ctx.restore();
 }
 
@@ -1011,8 +1131,16 @@ async function initGame() {
         lives = 3;
         consecutiveCorrect = 0;
         isPowerShot = false;
+        playerSkillUsed = false;
+        gkStunned = false;
+        vvdShieldActive = false;
         helps = { call: false, wise: false, fifty: false };
         document.querySelectorAll('.lifeline-btn').forEach(b => b.classList.remove('used'));
+        const skillBtn = document.getElementById('skillBtn');
+        if (skillBtn) {
+            skillBtn.classList.remove('used');
+            skillBtn.innerText = `⭐ KỸ NĂNG (${characterConfigs[characterIndex]?.name || 'SIÊU SAO'})`;
+        }
         document.querySelectorAll('.lifeline-select').forEach(s => {
             s.classList.remove('used');
             s.disabled = false;
@@ -1246,6 +1374,16 @@ function triggerTabSwitchPenalty(reason) {
     if (answerInput) answerInput.style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
     if (directionBox) directionBox.style.display = 'none';
+
+    if (vvdShieldActive) {
+        vvdShieldActive = false;
+        showPenaltyModal(
+            "🛡️ LÁ CHẮN THÉP VAN DIJK ĐÃ KÍCH HOẠT!",
+            `<b>Lá chắn Đội trưởng của Virgil Van Dijk</b> đã bảo vệ bạn! Bạn không bị trừ tim trong lần vi phạm/chuyển tab này. Hãy tập trung làm bài nhé!`,
+            () => {}
+        );
+        return;
+    }
 
     const isDead = handleLifeLoss();
 
@@ -1680,7 +1818,8 @@ function shoot(dir) {
     shooting = true;
     document.getElementById('directionBox').style.display = 'none';
     const goalieGuess = Math.floor(Math.random() * 3);
-    const isGoal = dir !== goalieGuess;
+    const isGoal = gkStunned ? true : (dir !== goalieGuess);
+    if (gkStunned) gkStunned = false;
     animateShot(dir, isGoal, function () {
         if (isGoal) {
             const addedScore = isPowerShot ? 2 : 1;
@@ -2200,4 +2339,266 @@ async function saveScore(name, jerseyNumber, finalScore) {
         alert("LƯU ĐIỂM THẤT BẠI!\n\nMã lỗi: " + errorMsg + "\n\nLời khuyên: Bạn hãy nhấn F12 (hoặc Chuột phải -> Kiểm tra) và xem tab 'Console' để thấy chi tiết lỗi màu đỏ nhé!");
     }
 }
+
+// === CÁC KỸ NĂNG ĐẶC BIỆT CỦA 10 CẦU THỦ (SIGNATURE SKILLS) ===
+let playerSkillUsed = false;
+let gkStunned = false;
+let vvdShieldActive = false;
+
+function activatePlayerSkill() {
+    if (!gameStarted || shooting) return;
+    if (playerSkillUsed) {
+        alert("⚠️ Bạn đã sử dụng Kỹ năng đặc biệt của trận đấu này rồi!");
+        return;
+    }
+
+    const char = characterConfigs[characterIndex];
+    const skillBtn = document.getElementById('skillBtn');
+    playerSkillUsed = true;
+    if (skillBtn) skillBtn.classList.add('used');
+
+    const q = activeQuestions[currentQuestion];
+
+    switch (characterIndex) {
+        case 0: // CR7: Powershot SIUUU
+            isPowerShot = true;
+            playCharacterAudio('wiseAudio_cr7');
+            setGameWeather('flare');
+            player.thought = "SIUUU! Cú nã đại bác x2 bàn thắng!";
+            document.getElementById('result').innerHTML = `<span class="powershot-text">⚡ CR7 KÍCH HOẠT POWERSHOT SIUUU (x2 ĐIỂM)!</span>`;
+            break;
+
+        case 1: // Messi: Nhãn quan GOAT (loại bỏ 2 đáp án sai)
+            playCharacterAudio('callAudio_messi');
+            if (q && q.type === 'mcq') {
+                const btns = document.querySelectorAll('.opt-btn');
+                let wrongIndices = [];
+                q.opts.forEach((opt, idx) => { if (idx !== q.ans) wrongIndices.push(idx); });
+                wrongIndices.sort(() => Math.random() - 0.5).slice(0, 2).forEach(idx => {
+                    if (btns[idx]) {
+                        btns[idx].style.visibility = 'hidden';
+                        btns[idx].style.pointerEvents = 'none';
+                    }
+                });
+                player.thought = "Nhãn quan GOAT đã soi sáng 2 đáp án sai!";
+                document.getElementById('result').innerHTML = `<span style="color:#2ecc71; font-weight:800;">🐐 MESSI: Đã loại bỏ 2 đáp án sai!</span>`;
+            } else {
+                timeLeft += 25;
+                updateTimerUI();
+                player.thought = "Messi truyền cảm hứng: +25s thời gian suy nghĩ!";
+                document.getElementById('result').innerHTML = `<span style="color:#2ecc71; font-weight:800;">🐐 MESSI: +25 Giây thời gian làm bài!</span>`;
+            }
+            break;
+
+        case 2: // Neymar: Samba Magic (Làm choáng thủ môn)
+            gkStunned = true;
+            goalie.state = 'stunned';
+            player.thought = "Vũ điệu Samba làm thủ môn hoa mắt! Đảm bảo 100% VÀO LƯỚI!";
+            document.getElementById('result').innerHTML = `<span style="color:#e8b958; font-weight:800;">🕺 NEYMAR: Samba Magic! Cú sút tiếp theo chắc chắn VÀO!</span>`;
+            break;
+
+        case 3: // Mbappé: Tốc độ Ánh sáng (+15s)
+            timeLeft += 20;
+            updateTimerUI();
+            player.thought = "Tốc độ ánh sáng của Ninja Rùa!";
+            document.getElementById('result').innerHTML = `<span style="color:#38bdf8; font-weight:800;">🏎️ MBAPPÉ: +20 Giây thời gian suy nghĩ!</span>`;
+            break;
+
+        case 4: // Yamal: Thần đồng 50/50
+            if (q && q.type === 'mcq') {
+                const btns = document.querySelectorAll('.opt-btn');
+                let wrongIndices = [];
+                q.opts.forEach((opt, idx) => { if (idx !== q.ans) wrongIndices.push(idx); });
+                wrongIndices.sort(() => Math.random() - 0.5).slice(0, 2).forEach(idx => {
+                    if (btns[idx]) {
+                        btns[idx].style.visibility = 'hidden';
+                        btns[idx].style.pointerEvents = 'none';
+                    }
+                });
+                player.thought = "Thần đồng Lamine Yamal kiến tạo 50/50!";
+                document.getElementById('result').innerHTML = `<span style="color:#ffd15c; font-weight:800;">💎 YAMAL: Kích hoạt trợ giúp 50/50 miễn phí!</span>`;
+            } else {
+                timeLeft += 15;
+                updateTimerUI();
+                document.getElementById('result').innerHTML = `<span style="color:#ffd15c; font-weight:800;">💎 YAMAL: +15 Giây thời gian gõ code!</span>`;
+            }
+            break;
+
+        case 5: // Lukaku: Tường thép LAKAKA
+            gkStunned = true;
+            isPowerShot = true;
+            playCharacterAudio('wiseAudio_lukaku');
+            player.thought = "LAKAKA bật tường dội thẳng vào khung thành!";
+            document.getElementById('result').innerHTML = `<span style="color:#e67e22; font-weight:800;">🧱 LUKAKU: Tường thép dội bóng x2 bàn thắng!</span>`;
+            break;
+
+        case 6: // Van Dijk: Lá chắn thép
+            vvdShieldActive = true;
+            if (lives < 4) {
+                lives++;
+                render();
+            }
+            player.thought = "Lá chắn thép Virgil Van Dijk bảo vệ khung gỗ!";
+            document.getElementById('result').innerHTML = `<span style="color:#27ae60; font-weight:800;">🛡️ VAN DIJK: Tặng +1 Tim ❤️ & Kích hoạt Khiên chống trừ tim!</span>`;
+            break;
+
+        case 7: // Speed: Tiếng gầm bùng nổ
+            setGameWeather('flare');
+            isPowerShot = true;
+            player.thought = "SUUUIIII! IShowSpeed BARK BARK BARK!";
+            document.getElementById('result').innerHTML = `<span style="color:#f43f5e; font-weight:800;">🔥 SPEED: Tiếng gầm bùng nổ pháo sáng & x2 điểm sút!</span>`;
+            break;
+
+        case 8: // Xuân Son: Vua phá lưới (tặng thêm bàn thắng)
+            score += 1;
+            isPowerShot = true;
+            player.thought = "Vua phá lưới Nguyễn Xuân Son ghi bàn không ngừng nghỉ!";
+            document.getElementById('result').innerHTML = `<span style="color:#f39c12; font-weight:800;">🌟 XUÂN SON: +1 Bàn thắng trực tiếp & Powershot x2!</span>`;
+            break;
+
+        case 9: // Độ Mixi: Khô gà đè tem (+1 tim hồi phục)
+            lives = Math.min(lives + 1, 4);
+            playCharacterAudio('callAudio');
+            player.thought = "Ăn miếng khô gà đè tem, hồi lại 1 tim!";
+            render();
+            document.getElementById('result').innerHTML = `<span style="color:#e74c3c; font-weight:800;">🍗 ĐỘ MIXI: Hồi phục +1 Tim ❤️ thành công!</span>`;
+            break;
+    }
+    render();
+}
+
+// === SOUNDBOARD AUDIO SYSTEM ===
+let currentPlayingAudio = null;
+
+function openSoundboardModal() {
+    document.getElementById('soundboardModal').style.display = 'flex';
+}
+
+function playSound(audioSrc) {
+    if (currentPlayingAudio) {
+        currentPlayingAudio.pause();
+        currentPlayingAudio.currentTime = 0;
+    }
+    const audio = new Audio('music/' + audioSrc.replace('music/', ''));
+    currentPlayingAudio = audio;
+    audio.play().catch(e => console.log("Soundboard play error:", e));
+}
+
+function stopAllSounds() {
+    if (currentPlayingAudio) {
+        currentPlayingAudio.pause();
+        currentPlayingAudio.currentTime = 0;
+    }
+}
+
+// === GUESTBOOK / MEMORY WALL SYSTEM ===
+const DEFAULT_WISHES = [
+    { name: "Hoàng Long (11A1)", avatar: "👑", content: "Game quá cuốn thầy ơi! Module 2 cứu mạng em kỳ thi giữa kỳ vừa rồi ⚽", time: "Hôm qua" },
+    { name: "Minh Thư (12 Tin)", avatar: "🐐", content: "Chúc dự án game tiếp theo của thầy ngày càng bùng nổ ạ! Nhớ nhạc SIUUU ghê ❤️", time: "2 ngày trước" },
+    { name: "Tuấn Anh (10A4)", avatar: "🍗", content: "Em mở trúng bao 100k sướng rơn cả buổi học! Cảm ơn game rất nhiều ạ!", time: "3 ngày trước" },
+    { name: "Bảo Nam (11 Toán)", avatar: "🏎️", content: "Mong thầy cập nhật thêm chế độ sút pen 1v1 PvP đối kháng thời gian thực nữa thì cháy luôn ạ!", time: "Tuần trước" }
+];
+
+function openGuestbookModal() {
+    document.getElementById('guestbookModal').style.display = 'flex';
+    loadGuestbookWishes();
+}
+
+async function loadGuestbookWishes() {
+    const container = document.getElementById('gbListContainer');
+    if (!container) return;
+
+    let wishes = [...DEFAULT_WISHES];
+
+    // Lấy thêm từ LocalStorage
+    try {
+        const localData = localStorage.getItem('penalty_guestbook');
+        if (localData) {
+            const parsed = JSON.parse(localData);
+            wishes = [...parsed, ...wishes];
+        }
+    } catch (e) {}
+
+    // Lấy từ Supabase (nếu có table guestbook)
+    try {
+        const { data, error } = await supabaseClient
+            .from('guestbook')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (!error && data && data.length > 0) {
+            const remoteWishes = data.map(w => ({
+                name: w.name || w.author || 'Bạn học sinh ẩn danh',
+                avatar: w.avatar || '⭐',
+                content: w.content || w.message,
+                time: w.created_at ? new Date(w.created_at).toLocaleDateString('vi-VN') : 'Gần đây'
+            }));
+            wishes = [...remoteWishes, ...wishes];
+        }
+    } catch (err) {}
+
+    renderGuestbookWishes(wishes);
+}
+
+function renderGuestbookWishes(wishes) {
+    const container = document.getElementById('gbListContainer');
+    if (!container) return;
+
+    container.innerHTML = wishes.map(w => `
+        <div style="background: #fff; border: 1px solid #edf2f7; border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; gap: 12px; align-items: flex-start;">
+            <div style="font-size: 1.8rem; line-height: 1; background: #f7fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0;">${w.avatar || '⭐'}</div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <b style="color: #2d3748; font-size: 0.95rem;">${w.name}</b>
+                    <small style="color: #a0aec0; font-size: 0.75rem;">${w.time}</small>
+                </div>
+                <div style="color: #4a5568; font-size: 0.9rem; line-height: 1.4;">${w.content}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function submitGuestbookWish() {
+    const author = document.getElementById('gbAuthor')?.value.trim();
+    const avatar = document.getElementById('gbAvatar')?.value || '👑';
+    const content = document.getElementById('gbContent')?.value.trim();
+
+    if (!author || !content) {
+        alert("⚠️ Vui lòng nhập tên và lời nhắn của bạn nhé!");
+        return;
+    }
+
+    if (containsProfanity(author) || containsProfanity(content)) {
+        alert("⚠️ Lời nhắn chứa từ ngữ không phù hợp. Vui lòng chỉnh sửa lại lịch sự hơn!");
+        return;
+    }
+
+    const newWish = {
+        name: author,
+        avatar: avatar,
+        content: content,
+        time: 'Vừa xong'
+    };
+
+    // Lưu vào LocalStorage
+    try {
+        const localData = localStorage.getItem('penalty_guestbook');
+        const parsed = localData ? JSON.parse(localData) : [];
+        parsed.unshift(newWish);
+        localStorage.setItem('penalty_guestbook', JSON.stringify(parsed));
+    } catch (e) {}
+
+    // Lưu vào Supabase nếu có
+    try {
+        await supabaseClient
+            .from('guestbook')
+            .insert([{ name: author, avatar: avatar, content: content }]);
+    } catch (e) {}
+
+    document.getElementById('gbContent').value = '';
+    alert("✨ Cảm ơn bạn! Lời lưu bút / ý tưởng của bạn đã được gửi thành công!");
+    loadGuestbookWishes();
+}
+
 

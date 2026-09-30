@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Báo & Tri Ân: Game Penalty Master | Kỷ Niệm & Mong Muốn V2</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg-dark: #070d18;
+            --bg-card: rgba(13, 24, 43, 0.84);
+            --gold-main: #ffd15c;
+            --gold-gradient: linear-gradient(135deg, #ffe082 0%, #ffb300 50%, #ff8f00 100%);
+            --text-main: #ffffff;
+            --text-sub: #b4c6db;
+            --border-glow: rgba(255, 209, 92, 0.35);
+            --rose-accent: #f43f5e;
+            --cyan-accent: #38bdf8;
+            --emerald-accent: #10b981;
+            --purple-accent: #a855f7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Outfit', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 16px 80px;
+        }
+
+        /* Ambient Dynamic Background */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow-1 { top: -10%; left: 15%; width: 480px; height: 480px; background: radial-gradient(circle, #ffb300, transparent 70%); }
+        .glow-2 { bottom: -10%; right: 15%; width: 520px; height: 520px; background: radial-gradient(circle, #38bdf8, transparent 70%); }
+        .glow-3 { top: 45%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, #f43f5e, transparent 75%); opacity: 0.15; }
+
+        /* ================= INTRO RONALDO SIUUU OVERLAY ================= */
+        #introOverlay {
+            position: fixed;
+            inset: 0;
+            background: #040911;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+        }
+
+        #introOverlay.fade-out {
+            opacity: 0;
+            transform: scale(1.06);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .intro-container {
+            width: min(94vw, 1060px);
+            aspect-ratio: 16/9;
+            max-height: 80vh;
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 209, 92, 0.3);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 209, 92, 0.2);
+            background: #0a1f14;
+        }
+
+        #introCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .intro-skip-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .intro-skip-btn:hover {
+            background: var(--gold-main);
+            color: #000;
+            border-color: var(--gold-main);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 209, 92, 0.4);
+        }
+
+        .intro-title-tag {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 209, 92, 0.5);
+            color: var(--gold-main);
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= MAIN FAREWELL CONTAINER ================= */
+        .closed-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 980px;
+            margin: auto;
+            opacity: 0;
+            transform: translateY(30px) scale(0.97);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .closed-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .closed-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            border-radius: 36px;
+            padding: 50px 42px;
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.65),
+                0 0 50px rgba(255, 209, 92, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .closed-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffb300, #f43f5e, #38bdf8, transparent);
+            animation: shimmerLine 4s linear infinite;
+        }
+
+        @keyframes shimmerLine {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(50%); }
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 209, 92, 0.1);
+            border: 1px solid var(--border-glow);
+            color: var(--gold-main);
+            padding: 8px 22px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(255, 209, 92, 0.15);
+        }
+
+        .status-badge .badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-main);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold-main);
+            animation: pulseDot 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 0.4; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        /* Memorial Crest / Icon */
+        .crest-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 20px;
+        }
+
+        .crest-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 209, 92, 0.4);
+            animation: rotateRing 20s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .crest-bg {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 209, 92, 0.2), rgba(244, 63, 94, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            transform: rotate(-5deg);
+            transition: transform 0.4s ease;
+        }
+
+        .crest-wrapper:hover .crest-bg {
+            transform: rotate(0deg) scale(1.08);
+        }
+
+        /* Typography */
+        h1.main-title {
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 30%, #ffd15c 80%, #ff9f43 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--gold-main);
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Replay Action Bar */
+        .replay-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-replay {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 209, 92, 0.35);
+            color: var(--gold-main);
+            padding: 9px 20px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-replay:hover {
+            background: var(--gold-main);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 209, 92, 0.35);
+        }
+
+        /* The Heartfelt Gratitude Letter */
+        .letter-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 32px 28px;
+            margin-bottom: 35px;
+            text-align: left;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .letter-card .letter-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+
+        .letter-content {
+            font-size: 1.05rem;
+            line-height: 1.85;
+            color: #e1e9f5;
+        }
+
+        .letter-content p {
+            margin-bottom: 16px;
+        }
+
+        .letter-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight-text {
+            color: var(--gold-main);
+            font-weight: 700;
+        }
+
+        .highlight-bright {
+            background: linear-gradient(120deg, rgba(255, 209, 92, 0.25), rgba(244, 63, 94, 0.25));
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Section Headings */
+        .feature-section-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .feature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .badge-gold { background: rgba(255, 209, 92, 0.15); color: var(--gold-main); border: 1px solid rgba(255, 209, 92, 0.35); }
+        .badge-cyan { background: rgba(56, 189, 248, 0.15); color: var(--cyan-accent); border: 1px solid rgba(56, 189, 248, 0.35); }
+        .badge-rose { background: rgba(244, 63, 94, 0.15); color: var(--rose-accent); border: 1px solid rgba(244, 63, 94, 0.35); }
+        .badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--purple-accent); border: 1px solid rgba(168, 85, 247, 0.35); }
+
+        .feature-title {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .feature-desc {
+            font-size: 0.92rem;
+            color: var(--text-sub);
+            max-width: 650px;
+            margin: auto;
+            line-height: 1.5;
+        }
+
+        /* ================= 1. SIGNATURE SKILLS SECTION ================= */
+        .skills-section {
+            background: linear-gradient(180deg, rgba(14, 28, 48, 0.75) 0%, rgba(8, 16, 28, 0.85) 100%);
+            border: 1.5px solid rgba(255, 209, 92, 0.22);
+            border-radius: 28px;
+            padding: 32px 24px;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .skill-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .skill-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 209, 92, 0.45);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .skill-face {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid var(--gold-main);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            flex-shrink: 0;
+        }
+
+        .skill-info {
+            flex-grow: 1;
+        }
+
+        .skill-name-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .skill-player {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .skill-tag {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--gold-main);
+            background: rgba(255, 209, 92, 0.15);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .skill-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--cyan-accent);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .skill-desc {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            line-height: 1.45;
+        }
+
+        /* ================= 2. WEATHER & FLARES ARENA SIMULATOR ================= */
+        .weather-section {
+            background: linear-gradient(180deg, rgba(12, 25, 42, 0.8) 0%, rgba(6, 14, 24, 0.9) 100%);
+            border: 1.5px solid rgba(56, 189, 248, 0.25);
+            border-radius: 28px;
+            padding: 32px 24px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .weather-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 18px 0 20px;
+        }
+
+        .weather-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 9px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .weather-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--cyan-accent);
+            transform: translateY(-2px);
+        }
+
+        .weather-btn.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(244, 63, 94, 0.3)) !important;
+            border-color: var(--cyan-accent) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .arena-canvas-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 850px;
+            aspect-ratio: 16/9;
+            margin: auto;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+            background: #081810;
+        }
+
+        #weatherCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .arena-action-bar {
+            position: absolute;
+            bottom: 14px;
+            right: 14px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .btn-kick-flare {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.45);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-kick-flare:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 22px rgba(244, 63, 94, 0.6);
+        }
+
+        /* ================= 3. MEMORY WALL & GUESTBOOK SECTION ================= */
+        .guestbook-section {
+            background: linear-gradient(180deg, rgba(16, 32, 54, 0.85) 0%, rgba(8, 18, 32, 0.95) 100%);
+            border: 1.5px solid rgba(168, 85, 247, 0.25);
+            border-radius: 28px;
+            padding: 35px 26px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        /* Guestbook Form */
+        .guestbook-form-card {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 22px;
+            padding: 24px;
+            margin: 22px auto 30px;
+            max-width: 720px;
+            text-align: left;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold-main);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--gold-main);
+            box-shadow: 0 0 10px rgba(255, 209, 92, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .btn-submit-wish {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 20px rgba(168, 85, 247, 0.4);
+            margin-top: 6px;
+        }
+
+        .btn-submit-wish:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.6);
+        }
+
+        /* Wish Category Filter Tabs */
+        .wall-filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-sub);
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: var(--purple-accent);
+            color: #ffffff;
+        }
+
+        /* Wishes Wall Grid */
+        .wishes-wall-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            text-align: left;
+        }
+
+        .wish-card {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .wish-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(168, 85, 247, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .wish-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .wish-author-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wish-avatar {
+            font-size: 1.5rem;
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wish-name {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .wish-time {
+            font-size: 0.72rem;
+            color: var(--text-sub);
+        }
+
+        .wish-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .badge-idea { background: rgba(56, 189, 248, 0.15); color: var(--cyan-accent); }
+        .badge-wish { background: rgba(168, 85, 247, 0.15); color: var(--purple-accent); }
+        .badge-love { background: rgba(244, 63, 94, 0.15); color: var(--rose-accent); }
+        .badge-quiz { background: rgba(255, 209, 92, 0.15); color: var(--gold-main); }
+
+        .wish-text {
+            font-size: 0.88rem;
+            color: #d1dcec;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            flex-grow: 1;
+        }
+
+        .wish-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 10px;
+        }
+
+        .like-btn {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            color: #ff6b81;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .like-btn:hover {
+            background: var(--rose-accent);
+            color: #ffffff;
+        }
+
+        /* ================= 4. SOUNDBOARD SECTION ================= */
+        .soundboard-section {
+            background: linear-gradient(180deg, rgba(16, 32, 56, 0.8) 0%, rgba(8, 18, 33, 0.9) 100%);
+            border: 1.5px solid rgba(255, 209, 92, 0.25);
+            border-radius: 28px;
+            padding: 32px 24px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .now-playing-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 10px 18px;
+            margin: 18px 0;
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .now-playing-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .now-playing-status strong { color: var(--gold-main); }
+
+        .equalizer {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 16px;
+        }
+
+        .equalizer span {
+            width: 3px;
+            background: var(--gold-main);
+            border-radius: 2px;
+            animation: eqBounce 1s infinite ease-in-out;
+        }
+
+        .equalizer span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+        .equalizer span:nth-child(2) { height: 80%; animation-delay: 0.3s; }
+        .equalizer span:nth-child(3) { height: 50%; animation-delay: 0.2s; }
+        .equalizer span:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+
+        @keyframes eqBounce {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+
+        .stop-all-btn {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #ff6b81;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stop-all-btn:hover { background: var(--rose-accent); color: #fff; }
+
+        .soundboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .sound-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 16px 12px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            user-select: none;
+        }
+
+        .sound-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 209, 92, 0.5);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .sound-btn .s-icon { font-size: 2rem; transition: transform 0.25s ease; }
+        .sound-btn:hover .s-icon { transform: scale(1.15); }
+        .sound-btn .s-name { font-size: 0.92rem; font-weight: 800; color: #ffffff; line-height: 1.3; }
+        .sound-btn .s-tag { font-size: 0.74rem; color: var(--text-sub); font-weight: 600; }
+
+        .sound-btn.playing {
+            background: linear-gradient(145deg, rgba(255, 209, 92, 0.22), rgba(244, 63, 94, 0.2)) !important;
+            border: 1.5px solid var(--gold-main) !important;
+            box-shadow: 0 0 25px rgba(255, 209, 92, 0.4) !important;
+            transform: translateY(-3px) scale(1.03);
+        }
+
+        .sound-btn.playing .s-name { color: var(--gold-main); }
+        .sound-btn.playing::after {
+            content: '▶ ĐANG PHÁT';
+            position: absolute;
+            bottom: 4px;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            color: var(--gold-main);
+            animation: pulseDot 1s infinite alternate;
+        }
+
+        /* ================= FOOTER ================= */
+        .farewell-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quote-text {
+            font-style: italic;
+            color: var(--text-sub);
+            font-size: 0.98rem;
+            max-width: 650px;
+            line-height: 1.6;
+        }
+
+        .signature {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--gold-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ================= FIXED FLOATING SCROLL INDICATOR ================= */
+        .fixed-scroll-indicator {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+            pointer-events: auto;
+            animation: pulseBreathe 2.4s infinite ease-in-out;
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+        }
+
+        .fixed-scroll-indicator.hidden {
+            opacity: 0 !important;
+            transform: translate(-50%, 15px) !important;
+            pointer-events: none !important;
+            visibility: hidden;
+        }
+
+        .mouse-icon {
+            width: 22px;
+            height: 36px;
+            border: 2px solid var(--gold-main);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            padding-top: 6px;
+            box-shadow: 0 0 15px rgba(255, 209, 92, 0.35);
+            background: rgba(8, 18, 33, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .mouse-wheel {
+            width: 4px;
+            height: 8px;
+            background: var(--gold-main);
+            border-radius: 2px;
+            animation: mouseScrollAnim 1.6s infinite ease-in-out;
+        }
+
+        @keyframes mouseScrollAnim {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(12px); opacity: 0; }
+        }
+
+        .scroll-text {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gold-main);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 209, 92, 0.5);
+            background: rgba(8, 18, 33, 0.6);
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 209, 92, 0.25);
+            backdrop-filter: blur(6px);
+        }
+
+        .chevrons-down {
+            color: var(--gold-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 8px rgba(255, 209, 92, 0.5));
+            animation: chevronBounce 1.4s infinite ease-in-out;
+        }
+
+        @keyframes chevronBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+
+        @keyframes pulseBreathe {
+            0%, 100% { opacity: 0.22; transform: translate(-50%, 0) scale(0.96); }
+            50% { opacity: 0.98; transform: translate(-50%, 4px) scale(1.02); }
+        }
+
+        @media (max-width: 700px) {
+            .closed-card { padding: 35px 20px; border-radius: 28px; }
+            .form-row { grid-template-columns: 1fr; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .soundboard-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <canvas id="bgCanvas"></canvas>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- ================= INTRO OVERLAY (RONALDO SIUUU) ================= -->
+    <div id="introOverlay">
+        <div class="intro-container">
+            <span class="intro-title-tag">⚡ CR7 SPECIAL SIUUU!</span>
+            <button class="intro-skip-btn" onclick="finishIntro()">
+                <span>Bỏ qua</span>
+                <span>⏭️</span>
+            </button>
+            <canvas id="introCanvas" width="1200" height="675"></canvas>
+        </div>
+    </div>
+
+    <!-- Main Farewell Interface -->
+    <div class="closed-wrapper" id="mainWrapper">
+        <div class="closed-card">
+            
+            <!-- Badge -->
+            <div class="status-badge">
+                <span class="badge-dot"></span>
+                <span>Thông Báo Chính Thức • Official Sunset & V2 Preview</span>
+            </div>
+
+            <!-- Icon Crest -->
+            <div>
+                <div class="crest-wrapper">
+                    <div class="crest-ring"></div>
+                    <div class="crest-bg">⚽</div>
+                </div>
+            </div>
+
+            <!-- Main Heading -->
+            <h1 class="main-title">GAME ĐÃ CHÍNH THỨC ĐÓNG CỬA</h1>
+            <p class="subtitle">Penalty Master • Hành trình bóng đá & lập trình Python khép lại</p>
+
+            <!-- Action Bar -->
+            <div class="replay-bar">
+                <a href="index.html" class="btn-replay" style="background: linear-gradient(135deg, #10b981, #059669); color:#fff; border-color:#10b981; text-decoration:none;">
+                    <span>⚽ VÀO CHƠI GAME NGAY</span>
+                    <span>🎮</span>
+                </a>
+                <button class="btn-replay" onclick="replayIntro()">
+                    <span>⚡ Xem lại Ronaldo SIUUU!</span>
+                    <span>🔄</span>
+                </button>
+                <a href="#guestbookSection" class="btn-replay" style="text-decoration:none;">
+                    <span>✍️ Viết Lưu Bút & Mong Muốn V2</span>
+                    <span>✨</span>
+                </a>
+            </div>
+
+            <!-- Letter Card -->
+            <div class="letter-card" id="letterSection">
+                <div class="letter-header">
+                    <span>💌</span>
+                    <span>Thư Tri Ân Gửi Đến Toàn Thể Các Bạn Học Sinh</span>
+                </div>
+                <div class="letter-content">
+                    <p>
+                        Cảm ơn tất cả các bạn học sinh đã <span class="highlight-text">đồng hành và gắn bó với game suốt thời gian qua</span>.
+                    </p>
+                    <p>
+                        Từ những câu hỏi trắc nghiệm logic, các bài tập code Python thử thách cho đến những cú sút penalty kịch tính trên sân cỏ ảo – sự nhiệt tình, tiếng cười và tinh thần học hỏi không ngừng của các bạn đã tạo nên linh hồn và những kỷ niệm vô giá cho Penalty Master.
+                    </p>
+                    <p>
+                        <span class="highlight-bright">✨ Chúc các bạn luôn dồi dào sức khỏe, học tập thật tốt và có một tương lai luôn rạng rỡ, tươi sáng và gặt hái được nhiều thành công rực rỡ!</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ================= 1. KỸ NĂNG ĐẶC BIỆT CỦA CẦU THỦ (SIGNATURE SKILLS) ================= -->
+            <div class="skills-section">
+                <div class="feature-section-header">
+                    <div class="feature-badge badge-gold">⚡ ĐẶC QUYỀN SIÊU SAO</div>
+                    <h2 class="feature-title">Kỹ Năng Đặc Biệt Theo Cầu Thủ (Signature Skills)</h2>
+                    <p class="feature-desc">Mỗi cầu thủ trong game sở hữu một tuyệt kỹ riêng biệt giúp học sinh lội ngược dòng và bùng nổ cảm xúc trên chấm penalty!</p>
+                </div>
+
+                <div class="skills-grid">
+                    <!-- CR7 -->
+                    <div class="skill-card" onclick="playSound('win.mp3', 'btn-sound-win', '⚡ CR7 Powershot SIUUU')">
+                        <img src="img/face_cr7.jpg" class="skill-face" alt="CR7">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Cristiano Ronaldo</span>
+                                <span class="skill-tag">#7</span>
+                            </div>
+                            <div class="skill-title">⚡ Cú Sút Sấm Sét SIUUU</div>
+                            <div class="skill-desc">Tăng 100% lực sút, nhân đôi điểm số khi bóng găm thẳng nóc lưới.</div>
+                        </div>
+                    </div>
+
+                    <!-- Messi -->
+                    <div class="skill-card" onclick="playSound('messi.mp3', 'btn-sound-messi', '🐐 GOAT Messi Trợ Giúp')">
+                        <img src="img/face_messi2.jpg" class="skill-face" alt="Messi">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Lionel Messi</span>
+                                <span class="skill-tag">#10</span>
+                            </div>
+                            <div class="skill-title">🐐 Nhãn Quan Thiên Tài</div>
+                            <div class="skill-desc">Tự động soi đường bóng và loại bỏ 2 phương án sai trong câu hỏi Python.</div>
+                        </div>
+                    </div>
+
+                    <!-- Neymar -->
+                    <div class="skill-card" onclick="playSound('win.mp3', 'btn-sound-win', '🕺 Neymar Samba Magic')">
+                        <img src="img/face_neymar2.png" class="skill-face" alt="Neymar">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Neymar Jr</span>
+                                <span class="skill-tag">#11</span>
+                            </div>
+                            <div class="skill-title">🕺 Vũ Điệu Samba Magic</div>
+                            <div class="skill-desc">Đảo chân ảo giác khiến thủ môn đối phương bị khựng 0.5s phản xạ.</div>
+                        </div>
+                    </div>
+
+                    <!-- Mbappe -->
+                    <div class="skill-card" onclick="playSound('win.mp3', 'btn-sound-win', '🏎️ Mbappé Tốc Độ Ánh Sáng')">
+                        <img src="img/face_mbappe2.jpg" class="skill-face" alt="Mbappe">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Kylian Mbappé</span>
+                                <span class="skill-tag">#9</span>
+                            </div>
+                            <div class="skill-title">🏎️ Tốc Độ Ánh Sáng</div>
+                            <div class="skill-desc">Cộng thêm ngay +15 giây thời gian suy nghĩ cho mọi câu hỏi code.</div>
+                        </div>
+                    </div>
+
+                    <!-- Yamal -->
+                    <div class="skill-card" onclick="playSound('win.mp3', 'btn-sound-win', '💎 Lamine Yamal Thần Đồng')">
+                        <img src="img/face_yamal2.jpg" class="skill-face" alt="Yamal">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Lamine Yamal</span>
+                                <span class="skill-tag">#19</span>
+                            </div>
+                            <div class="skill-title">💎 Thần Đồng Tuổi Trẻ</div>
+                            <div class="skill-desc">Tặng thêm 1 quyền trợ giúp 50/50 miễn phí ở mỗi lượt sút pen.</div>
+                        </div>
+                    </div>
+
+                    <!-- Độ Mixi -->
+                    <div class="skill-card" onclick="playSound('call.mp3', 'btn-sound-call', '🍗 Độ Mixi Khô Gà Đè Tem')">
+                        <img src="img/face_mixi2.jpg" class="skill-face" alt="Độ Mixi">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Tộc Trưởng Độ Mixi</span>
+                                <span class="skill-tag">#89</span>
+                            </div>
+                            <div class="skill-title">🍗 Khô Gà Đè Tem</div>
+                            <div class="skill-desc">Tặng ngay +1 tim ❤️ dự phòng và mở khóa quyền gọi điện thoại khẩn cấp.</div>
+                        </div>
+                    </div>
+
+                    <!-- Xuân Son -->
+                    <div class="skill-card" onclick="playSound('win2.mp3', 'btn-sound-win2', '🌟 Nguyễn Xuân Son Vua Phá Lưới')">
+                        <img src="img/xuanson.png" class="skill-face" alt="Xuân Son">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Nguyễn Xuân Son</span>
+                                <span class="skill-tag">#14</span>
+                            </div>
+                            <div class="skill-title">🌟 Vua Phá Lưới V-League</div>
+                            <div class="skill-desc">Tỷ lệ mở bao lì xì 100k & 200k VND tăng vọt gấp 3 lần khi thắng trận.</div>
+                        </div>
+                    </div>
+
+                    <!-- Lukaku -->
+                    <div class="skill-card" onclick="playSound('LAKAKA.mp3', 'btn-sound-lakaka', '🧱 Lukaku LAKAKA Tường Thép')">
+                        <img src="img/lukaku.jpg" class="skill-face" alt="Lukaku">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Romelu Lukaku</span>
+                                <span class="skill-tag">#90</span>
+                            </div>
+                            <div class="skill-title">🧱 Tường Thép LAKAKA</div>
+                            <div class="skill-desc">Bóng dội xà đập cột tạo quỹ đạo khó lường khiến thủ môn bó tay.</div>
+                        </div>
+                    </div>
+
+                    <!-- Van Dijk -->
+                    <div class="skill-card" onclick="playSound('gk.mp3', 'btn-sound-gk', '🛡️ Van Dijk Lá Chắn Thép')">
+                        <img src="img/vvd.jpg" class="skill-face" alt="Van Dijk">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">Virgil van Dijk</span>
+                                <span class="skill-tag">#4</span>
+                            </div>
+                            <div class="skill-title">🛡️ Lá Chắn Đội Trưởng</div>
+                            <div class="skill-desc">Miễn nhiễm 1 lần bị phạt trừ tim khi người chơi lỡ chuyển tab.</div>
+                        </div>
+                    </div>
+
+                    <!-- Speed -->
+                    <div class="skill-card" onclick="playSound('win.mp3', 'btn-sound-win', '🔥 IShowSpeed Tiếng Gầm Bùng Nổ')">
+                        <img src="img/speed.jpg" class="skill-face" alt="Speed">
+                        <div class="skill-info">
+                            <div class="skill-name-row">
+                                <span class="skill-player">IShowSpeed</span>
+                                <span class="skill-tag">#77</span>
+                            </div>
+                            <div class="skill-title">🔥 Tiếng Gầm Bùng Nổ</div>
+                            <div class="skill-desc">Hú hét tăng 200% tốc độ sút bóng khiến lưới rung bần bật.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 2. THỜI TIẾT & KHÁN ĐÀI PHÁO SÁNG ================= -->
+            <div class="weather-section">
+                <div class="feature-section-header">
+                    <div class="feature-badge badge-cyan">🏟️ HIỆU ỨNG SÂN VẬN ĐỘNG</div>
+                    <h2 class="feature-title">Thời Tiết & Pháo Sáng Khán Đài Chung Kết</h2>
+                    <p class="feature-desc">Mô phỏng chân thực các điều kiện thi đấu: Sân cỏ ban ngày, Đêm rực sáng, Mưa phùn giọt nước và Pháo sáng chung kết rực lửa!</p>
+                </div>
+
+                <!-- Weather Controls -->
+                <div class="weather-controls">
+                    <button class="weather-btn active" id="mode-day" onclick="setWeatherMode('day')">
+                        <span>☀️ Ban Ngày</span>
+                    </button>
+                    <button class="weather-btn" id="mode-night" onclick="setWeatherMode('night')">
+                        <span>🌙 Đêm Sáng Đèn</span>
+                    </button>
+                    <button class="weather-btn" id="mode-rain" onclick="setWeatherMode('rain')">
+                        <span>🌧️ Mưa Phùn Cỏ Ướt</span>
+                    </button>
+                    <button class="weather-btn" id="mode-flare" onclick="setWeatherMode('flare')">
+                        <span>🎆 Pháo Sáng Chung Kết</span>
+                    </button>
+                </div>
+
+                <!-- Live Stadium Canvas -->
+                <div class="arena-canvas-wrap">
+                    <canvas id="weatherCanvas" width="900" height="506"></canvas>
+                    <div class="arena-action-bar">
+                        <button class="btn-kick-flare" onclick="triggerArenaShot()">
+                            <span>⚽ Sút Penalty & Nổ Pháo</span>
+                            <span>🔥</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 3. BỨC TƯỜNG LƯU BÚT & MONG MUỐN V2 ================= -->
+            <div class="guestbook-section" id="guestbookSection">
+                <div class="feature-section-header">
+                    <div class="feature-badge badge-purple">✍️ LƯU BÚT HỌC SINH</div>
+                    <h2 class="feature-title">Bức Tường Kỷ Niệm & Mong Muốn Về Game V2</h2>
+                    <p class="feature-desc">Hãy gửi gắm lời chúc, kỷ niệm đáng nhớ hoặc ý tưởng nâng cấp game mà bạn mong muốn nhất!</p>
+                </div>
+
+                <!-- Submission Form -->
+                <div class="guestbook-form-card">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>👤 Tên hoặc Biệt danh của bạn</label>
+                            <input type="text" id="wishAuthor" class="form-input" placeholder="Ví dụ: Hoàng Long (Lớp 11A1)...">
+                        </div>
+                        <div class="form-group">
+                            <label>⚽ Cầu thủ / Avatar đại diện</label>
+                            <select id="wishAvatar" class="form-select">
+                                <option value="👑">👑 CR7 (Ronaldo)</option>
+                                <option value="🐐">🐐 Messi (GOAT)</option>
+                                <option value="🍗">🍗 Độ Mixi (Tộc trưởng)</option>
+                                <option value="🕺">🕺 Neymar Jr</option>
+                                <option value="🏎️">🏎️ Kylian Mbappé</option>
+                                <option value="🌟">🌟 Nguyễn Xuân Son</option>
+                                <option value="🦅">🦅 Trường Con Nam Định</option>
+                                <option value="🧙‍♂️">🧙‍♂️ Bác Trương Anh Ngọc</option>
+                                <option value="🔥">🔥 IShowSpeed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label>🏷️ Thể loại lời nhắn</label>
+                        <select id="wishCategory" class="form-select">
+                            <option value="wish">🚀 Mong muốn & Tính năng cho Game V2</option>
+                            <option value="love">❤️ Lời chúc & Kỷ niệm đẹp với game</option>
+                            <option value="idea">💡 Góp ý cơ chế sút & đồ họa</option>
+                            <option value="quiz">🐍 Ý tưởng câu hỏi lập trình Python</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>💬 Lời nhắn của bạn gửi đến Penalty Master</label>
+                        <textarea id="wishContent" class="form-textarea" placeholder="Chia sẻ cảm xúc, mong ước về chế độ đấu 1v1, thêm nhân vật hay lời chúc đến các bạn học sinh..."></textarea>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <button class="btn-submit-wish" onclick="submitWish()">
+                            <span>Gửi Lưu Bút Của Bạn</span>
+                            <span>✨</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="wall-filter-tabs">
+                    <button class="tab-btn active" onclick="filterWishes('all')">Tất cả (<span id="count-all">0</span>)</button>
+                    <button class="tab-btn" onclick="filterWishes('wish')">🚀 Mong muốn V2</button>
+                    <button class="tab-btn" onclick="filterWishes('love')">❤️ Lời chúc kỷ niệm</button>
+                    <button class="tab-btn" onclick="filterWishes('idea')">💡 Góp ý nâng cấp</button>
+                    <button class="tab-btn" onclick="filterWishes('quiz')">🐍 Câu hỏi Python</button>
+                </div>
+
+                <!-- Wishes Wall -->
+                <div class="wishes-wall-grid" id="wishesContainer">
+                    <!-- Dynamic Wishes injected via JS -->
+                </div>
+            </div>
+
+            <!-- ================= 4. SOUNDBOARD SECTION ================= -->
+            <div class="soundboard-section">
+                <div class="feature-section-header">
+                    <div class="feature-badge badge-gold">🎧 SOUNDBOARD</div>
+                    <h2 class="feature-title">🎶 Hộp Âm Thanh Kỷ Niệm</h2>
+                    <p class="feature-desc">Nghe lại trọn vẹn những câu nói, tiếng hò reo SIUUU và giai điệu quen thuộc trong game!</p>
+                </div>
+
+                <!-- Now Playing / Status Bar -->
+                <div class="now-playing-bar">
+                    <div class="now-playing-status">
+                        <div class="equalizer" id="soundEq" style="display: none;">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <span id="playingStatusText">Chưa có âm thanh nào đang phát</span>
+                    </div>
+                    <button class="stop-all-btn" onclick="stopAllSounds()">⏹️ Dừng tất cả</button>
+                </div>
+
+                <!-- Sound Buttons Grid -->
+                <div class="soundboard-grid">
+                    <!-- Sound 1: CR7 SIUUU -->
+                    <button class="sound-btn" id="btn-sound-win" onclick="playSound('win.mp3', 'btn-sound-win', '⚽ CR7 SIUUU! & Bàn Thắng')">
+                        <span class="s-icon">⚽</span>
+                        <span class="s-name">CR7 SIUUU!</span>
+                        <span class="s-tag">Vào lưới & Ăn mừng</span>
+                    </button>
+
+                    <!-- Sound 2: Victory Anthem -->
+                    <button class="sound-btn" id="btn-sound-win2" onclick="playSound('win2.mp3', 'btn-sound-win2', '🏆 Nhạc Khải Hoàn Chiến Thắng')">
+                        <span class="s-icon">🏆</span>
+                        <span class="s-name">Khải Hoàn Mở Quà</span>
+                        <span class="s-tag">Giai điệu chiến thắng</span>
+                    </button>
+
+                    <!-- Sound 3: GOAT Messi -->
+                    <button class="sound-btn" id="btn-sound-messi" onclick="playSound('messi.mp3', 'btn-sound-messi', '🐐 GOAT Messi Trợ Giúp')">
+                        <span class="s-icon">🐐</span>
+                        <span class="s-name">GOAT Messi</span>
+                        <span class="s-tag">Cầu cứu GOAT</span>
+                    </button>
+
+                    <!-- Sound 4: Độ Mixi -->
+                    <button class="sound-btn" id="btn-sound-call" onclick="playSound('call.mp3', 'btn-sound-call', '📞 Anh Độ Mixi Gọi Điện')">
+                        <span class="s-icon">📱</span>
+                        <span class="s-name">Anh Độ Mixi</span>
+                        <span class="s-tag">Trợ giúp gọi điện</span>
+                    </button>
+
+                    <!-- Sound 5: Trường Con Nam Định -->
+                    <button class="sound-btn" id="btn-sound-truongcon" onclick="playSound('truongconnd.mp3', 'btn-sound-truongcon', '🦅 Bác Trường Con Nam Định')">
+                        <span class="s-icon">🦅</span>
+                        <span class="s-name">Trường Con NĐ</span>
+                        <span class="s-tag">Nhà thông thái uy tín</span>
+                    </button>
+
+                    <!-- Sound 6: Lakaka Lukaku -->
+                    <button class="sound-btn" id="btn-sound-lakaka" onclick="playSound('LAKAKA.mp3', 'btn-sound-lakaka', '🧱 Lukaku LAKAKA')">
+                        <span class="s-icon">🧱</span>
+                        <span class="s-name">Romelu Lukaku</span>
+                        <span class="s-tag">Sound LAKAKA</span>
+                    </button>
+
+                    <!-- Sound 7: Nhà thông thái Trương Anh Ngọc -->
+                    <button class="sound-btn" id="btn-sound-wise" onclick="playSound('wise.mp3', 'btn-sound-wise', '🧙 Bác Trương Anh Ngọc Tư Vấn')">
+                        <span class="s-icon">🧙‍♂️</span>
+                        <span class="s-name">Trương Anh Ngọc</span>
+                        <span class="s-tag">Nhà thông thái</span>
+                    </button>
+
+                    <!-- Sound 8: Thủ môn cản phá -->
+                    <button class="sound-btn" id="btn-sound-gk" onclick="playSound('gk.mp3', 'btn-sound-gk', '🧤 Thủ Môn Bay Người Cứu Thua')">
+                        <span class="s-icon">🧤</span>
+                        <span class="s-name">Thủ Môn Cản Phá</span>
+                        <span class="s-tag">Âm thanh đẩy bóng</span>
+                    </button>
+
+                    <!-- Sound 9: Thất bại / Tiếng còi -->
+                    <button class="sound-btn" id="btn-sound-lose" onclick="playSound('lose.mp3', 'btn-sound-lose', '💔 Tiếng Còi & Nhạc Hết Giờ')">
+                        <span class="s-icon">💔</span>
+                        <span class="s-name">Thất Bại / Hết Giờ</span>
+                        <span class="s-tag">Kỷ niệm thua trận</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer & Signature -->
+            <div class="farewell-footer">
+                <p class="quote-text">
+                    “Mỗi chặng đường khép lại sẽ mở ra những hành trình mới tươi đẹp hơn. Cảm ơn các bạn vì đã là một phần tuyệt vời nhất của Penalty Master!”
+                </p>
+                <div class="signature">
+                    <span>⚽ BAN QUẢN TRỊ PENALTY MASTER ❤️</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Fixed Floating Breathing Scroll Indicator -->
+    <div class="fixed-scroll-indicator hidden" id="fixedScrollIndicator" onclick="scrollToLetter()">
+        <div class="mouse-icon">
+            <div class="mouse-wheel"></div>
+        </div>
+        <span class="scroll-text">Cuộn xuống để xem tiếp</span>
+        <div class="chevrons-down">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Audio for CR7 Intro SIUUU -->
+    <audio id="introSiuuAudio" src="music/win.mp3"></audio>
+
+    <!-- Canvas Floating Stars & Background Particles -->
+    <script>
+        // Supabase Client Init
+        const SUPABASE_URL = 'https://djkmfemvlscwhuflghsm.supabase.co'.trim();
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqa21mZW12bHNjd2h1ZmxnaHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MTczMDAsImV4cCI6MjA5MTI5MzMwMH0.xgtNymE3c8J1Da-BdsHMn4gVmM3FGGYfb1ZbOvVYq7w'.trim();
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) {
+            console.log("Supabase guestbook fallback active.");
+        }
+
+        // ================= BACKGROUND PARTICLES =================
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgW = (bgCanvas.width = window.innerWidth);
+        let bgH = (bgCanvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+            bgW = bgCanvas.width = window.innerWidth;
+            bgH = bgCanvas.height = window.innerHeight;
+        });
+
+        const bgParticles = [];
+        const bgParticleCount = Math.min(65, Math.floor(window.innerWidth / 18));
+
+        class StarParticle {
+            constructor() { this.reset(true); }
+            reset(initial = false) {
+                this.x = Math.random() * bgW;
+                this.y = initial ? Math.random() * bgH : bgH + 15;
+                this.size = Math.random() * 2.8 + 0.8;
+                this.speedY = Math.random() * 0.45 + 0.15;
+                this.speedX = (Math.random() - 0.5) * 0.25;
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.maxAlpha = this.alpha;
+                this.pulseSpeed = Math.random() * 0.02 + 0.01;
+                this.pulse = Math.random() * Math.PI;
+                this.isGold = Math.random() > 0.4;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                this.pulse += this.pulseSpeed;
+                if (this.y < -15 || this.x < -15 || this.x > bgW + 15) this.reset();
+            }
+            draw() {
+                const currentAlpha = Math.max(0.05, (Math.sin(this.pulse) * 0.5 + 0.5) * this.maxAlpha);
+                bgCtx.save();
+                bgCtx.globalAlpha = currentAlpha;
+                bgCtx.fillStyle = this.isGold ? '#ffd15c' : '#ffffff';
+                bgCtx.shadowColor = this.isGold ? '#ffb300' : '#38bdf8';
+                bgCtx.shadowBlur = this.size * 3;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+                bgCtx.restore();
+            }
+        }
+
+        for (let i = 0; i < bgParticleCount; i++) bgParticles.push(new StarParticle());
+
+        function animateBackground() {
+            bgCtx.clearRect(0, 0, bgW, bgH);
+            for (let i = 0; i < bgParticles.length; i++) {
+                bgParticles[i].update();
+                bgParticles[i].draw();
+            }
+            requestAnimationFrame(animateBackground);
+        }
+        animateBackground();
+
+        // ================= RONALDO SIUUU INTRO =================
+        const introOverlay = document.getElementById('introOverlay');
+        const mainWrapper = document.getElementById('mainWrapper');
+        const introCanvas = document.getElementById('introCanvas');
+        const introCtx = introCanvas.getContext('2d');
+        const siuuAudio = document.getElementById('introSiuuAudio');
+        const fixedScrollIndicator = document.getElementById('fixedScrollIndicator');
+
+        const dpr = window.devicePixelRatio || 1;
+        let cw = 1200, ch = 675;
+
+        function resizeIntro() {
+            const rect = introCanvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                introCanvas.width = rect.width * dpr;
+                introCanvas.height = rect.height * dpr;
+                introCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                cw = rect.width;
+                ch = rect.height;
+            }
+        }
+        window.addEventListener('resize', resizeIntro);
+        setTimeout(resizeIntro, 50);
+
+        let introAnimTime = 0, introLastTimestamp = performance.now();
+        let introHasPlayedAudio = false, introFinished = false;
+        let introParticles = [], introShockwaves = [], introNetBulge = 0, introAnimationId = null;
+
+        function addIntroGoalParticles(x, y) {
+            for (let i = 0; i < 45; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 3 + Math.random() * 9;
+                introParticles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
+                    color: Math.random() > 0.4 ? '#ffd15c' : '#ffffff',
+                    size: 3 + Math.random() * 6, alpha: 1
+                });
+            }
+        }
+
+        function addIntroLandingShockwave(x, y) {
+            introShockwaves.push({ x: x, y: y, radius: 10, alpha: 1 });
+            for (let i = 0; i < 60; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 4 + Math.random() * 12;
+                introParticles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed * 0.4 - 1,
+                    color: Math.random() > 0.3 ? '#ffd15c' : '#f43f5e',
+                    size: 4 + Math.random() * 7, alpha: 1
+                });
+            }
+        }
+
+        function drawIntroStadium() {
+            const grad = introCtx.createLinearGradient(0, 0, 0, ch);
+            grad.addColorStop(0, '#0c2e19'); grad.addColorStop(0.45, '#164d2b'); grad.addColorStop(1, '#082413');
+            introCtx.fillStyle = grad;
+            introCtx.fillRect(0, 0, cw, ch);
+
+            introCtx.save();
+            introCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            introCtx.beginPath();
+            introCtx.arc(cw * 0.2, -50, 260, 0, Math.PI * 2);
+            introCtx.arc(cw * 0.8, -50, 260, 0, Math.PI * 2);
+            introCtx.fill();
+            introCtx.restore();
+
+            const stripeWidth = cw / 12;
+            for (let i = 0; i < 12; i += 2) {
+                introCtx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+                introCtx.fillRect(i * stripeWidth, 0, stripeWidth, ch);
+            }
+
+            introCtx.save();
+            introCtx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
+            introCtx.lineWidth = 3;
+            introCtx.strokeRect(cw * 0.08, ch * 0.22, cw * 0.84, ch * 0.7);
+
+            const goalX = cw * 0.82, goalY = ch * 0.26, goalW = cw * 0.12, goalH = ch * 0.36;
+
+            introCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            introCtx.fillRect(goalX, goalY, goalW, goalH);
+            introCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+            introCtx.lineWidth = 1.2;
+
+            for (let gx = goalX; gx <= goalX + goalW; gx += 12) {
+                introCtx.beginPath();
+                const offsetX = (gx > goalX + goalW * 0.4) ? introNetBulge * 15 : 0;
+                introCtx.moveTo(gx + offsetX, goalY);
+                introCtx.lineTo(gx + offsetX, goalY + goalH);
+                introCtx.stroke();
+            }
+            for (let gy = goalY; gy <= goalY + goalH; gy += 12) {
+                introCtx.beginPath();
+                introCtx.moveTo(goalX, gy);
+                introCtx.lineTo(goalX + goalW + introNetBulge * 15, gy);
+                introCtx.stroke();
+            }
+
+            introCtx.strokeStyle = '#ffffff';
+            introCtx.lineWidth = 7;
+            introCtx.strokeRect(goalX, goalY, goalW, goalH);
+
+            introCtx.fillStyle = '#ffffff';
+            introCtx.beginPath();
+            introCtx.arc(cw * 0.35, ch * 0.68, 6, 0, Math.PI * 2);
+            introCtx.fill();
+            introCtx.restore();
+        }
+
+        function drawIntroCR7(x, y, scale, pose, param = 0) {
+            introCtx.save();
+            introCtx.translate(x, y);
+            introCtx.scale(scale, scale);
+
+            const skin = '#e2a374', skinShadow = '#c28356', hair = '#1a1614', kitWhite = '#ffffff', kitGold = '#ffd15c', bootColor = '#f43f5e';
+
+            if (pose !== 'jump') {
+                introCtx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+                introCtx.beginPath();
+                introCtx.ellipse(0, 16, 42, 11, 0, 0, Math.PI * 2);
+                introCtx.fill();
+            }
+
+            function drawBone(x1, y1, x2, y2, w1, w2, color) {
+                introCtx.save();
+                introCtx.fillStyle = color;
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const perp = angle + Math.PI / 2;
+                introCtx.beginPath();
+                introCtx.moveTo(x1 + Math.cos(perp) * (w1 / 2), y1 + Math.sin(perp) * (w1 / 2));
+                introCtx.lineTo(x2 + Math.cos(perp) * (w2 / 2), y2 + Math.sin(perp) * (w2 / 2));
+                introCtx.lineTo(x2 - Math.cos(perp) * (w2 / 2), y2 - Math.sin(perp) * (w2 / 2));
+                introCtx.lineTo(x1 - Math.cos(perp) * (w1 / 2), y1 - Math.sin(perp) * (w1 / 2));
+                introCtx.closePath();
+                introCtx.fill();
+                introCtx.beginPath(); introCtx.arc(x1, y1, w1 / 2, 0, Math.PI * 2); introCtx.fill();
+                introCtx.beginPath(); introCtx.arc(x2, y2, w2 / 2, 0, Math.PI * 2); introCtx.fill();
+                introCtx.restore();
+            }
+
+            function drawHead(hx, hy, headAngle = 0, openMouth = false) {
+                introCtx.save();
+                introCtx.translate(hx, hy);
+                introCtx.rotate(headAngle);
+                introCtx.fillStyle = skin;
+                introCtx.beginPath(); introCtx.ellipse(0, 0, 14, 17, 0, 0, Math.PI * 2); introCtx.fill();
+                introCtx.fillStyle = hair;
+                introCtx.fillRect(-14, -14, 28, 9);
+                introCtx.beginPath(); introCtx.ellipse(0, -7, 15, 12, 0, Math.PI, Math.PI * 2); introCtx.fill();
+                introCtx.fillStyle = '#222'; introCtx.fillRect(2, -4, 4, 2);
+                if (openMouth) {
+                    introCtx.fillStyle = '#600';
+                    introCtx.beginPath(); introCtx.ellipse(4, 5, 5, 7, 0, 0, Math.PI * 2); introCtx.fill();
+                    introCtx.fillStyle = '#fff'; introCtx.fillRect(2, 0, 4, 2);
+                }
+                introCtx.restore();
+            }
+
+            if (pose === 'run') {
+                const t = introAnimTime * 14;
+                const stride = Math.sin(t);
+                introCtx.translate(0, -Math.abs(Math.sin(t * 2)) * 6);
+                introCtx.rotate(-0.15);
+                drawBone(-6, -35, -6 + Math.sin(-stride) * 22, -35 + Math.cos(-stride) * 24, 14, 11, '#ffffff');
+                drawBone(6, -35, 6 + Math.sin(stride) * 22, -35 + Math.cos(stride) * 24, 14, 11, '#ffffff');
+                introCtx.fillStyle = kitWhite;
+                introCtx.fillRect(-16, -75, 32, 40);
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 20px Outfit';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -48);
+                drawHead(0, -90, 0.05);
+            } else if (pose === 'kick') {
+                introCtx.rotate(0.2);
+                drawBone(-8, -35, -20, 15, 14, 11, '#ffffff');
+                const kickAngle = -0.4 - Math.min(1, param) * 1.2;
+                drawBone(6, -35, 6 + Math.cos(kickAngle) * 28, -35 + Math.sin(kickAngle) * 28, 14, 11, '#ffffff');
+                introCtx.fillStyle = kitWhite;
+                introCtx.fillRect(-16, -75, 32, 40);
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 20px Outfit';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -48);
+                drawHead(4, -90, -0.15);
+            } else if (pose === 'jump') {
+                introCtx.scale(Math.cos(param), 1);
+                drawBone(-10, -35, -18, 12, 13, 8, '#ffffff');
+                drawBone(10, -35, 18, 12, 13, 8, '#ffffff');
+                introCtx.fillStyle = kitWhite;
+                introCtx.fillRect(-16, -75, 32, 42);
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 20px Outfit';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -50);
+                drawHead(0, -92, 0);
+            } else if (pose === 'siuu') {
+                drawBone(-10, -35, -32, 16, 15, 9, '#ffffff');
+                drawBone(10, -35, 32, 16, 15, 9, '#ffffff');
+                introCtx.fillStyle = '#ffffff';
+                introCtx.fillRect(-22, -42, 44, 20);
+                introCtx.fillStyle = kitWhite;
+                introCtx.fillRect(-18, -82, 36, 44);
+                introCtx.fillStyle = kitGold;
+                introCtx.font = '900 22px Outfit';
+                introCtx.textAlign = 'center';
+                introCtx.fillText('7', 0, -52);
+                drawBone(-16, -76, -50, -32, 10, 8, skin);
+                drawBone(16, -76, 50, -32, 10, 8, skin);
+                drawHead(0, -98, -0.12, true);
+            }
+            introCtx.restore();
+        }
+
+        function animateIntro(now) {
+            if (introFinished) return;
+            const delta = (now - introLastTimestamp) / 1000;
+            introLastTimestamp = now;
+            introAnimTime += delta;
+            const cycle = introAnimTime;
+
+            drawIntroStadium();
+
+            // Shockwaves
+            for (let i = introShockwaves.length - 1; i >= 0; i--) {
+                const sw = introShockwaves[i];
+                sw.radius += delta * 340;
+                sw.alpha -= delta * 1.4;
+                if (sw.alpha <= 0) { introShockwaves.splice(i, 1); continue; }
+                introCtx.save();
+                introCtx.strokeStyle = `rgba(255, 209, 92, ${sw.alpha})`;
+                introCtx.lineWidth = 6;
+                introCtx.beginPath();
+                introCtx.ellipse(sw.x, sw.y, sw.radius, sw.radius * 0.35, 0, 0, Math.PI * 2);
+                introCtx.stroke();
+                introCtx.restore();
+            }
+
+            // Particles
+            for (let i = introParticles.length - 1; i >= 0; i--) {
+                const p = introParticles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += 0.22; p.alpha -= delta * 1.1;
+                if (p.alpha <= 0) { introParticles.splice(i, 1); continue; }
+                introCtx.save();
+                introCtx.globalAlpha = Math.max(0, p.alpha);
+                introCtx.fillStyle = p.color;
+                introCtx.beginPath(); introCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); introCtx.fill();
+                introCtx.restore();
+            }
+
+            if (introNetBulge > 0) introNetBulge = Math.max(0, introNetBulge - delta * 2);
+
+            if (cycle < 2.0) {
+                const progress = cycle / 2.0;
+                const cr7X = cw * 0.14 + progress * (cw * 0.22);
+                let ballX = cw * 0.35, ballY = ch * 0.68;
+                if (progress < 0.82) {
+                    drawIntroCR7(cr7X, ch * 0.68, 1.15, 'run');
+                } else {
+                    const kickProg = (progress - 0.82) / 0.18;
+                    drawIntroCR7(cr7X + 12, ch * 0.68, 1.15, 'kick', kickProg);
+                    ballX = cw * 0.35 + kickProg * (cw * 0.49);
+                    ballY = ch * 0.68 - kickProg * (ch * 0.35);
+                    if (kickProg >= 0.9 && introParticles.length === 0) {
+                        introNetBulge = 1;
+                        addIntroGoalParticles(cw * 0.84, ch * 0.33);
+                    }
+                }
+                introCtx.save();
+                introCtx.translate(ballX, ballY);
+                introCtx.fillStyle = '#ffffff';
+                introCtx.beginPath(); introCtx.arc(0, 0, 13, 0, Math.PI * 2); introCtx.fill();
+                introCtx.strokeStyle = '#111'; introCtx.lineWidth = 2; introCtx.stroke();
+                introCtx.restore();
+            } else if (cycle < 3.7) {
+                const stageProgress = (cycle - 2.0) / 1.7;
+                const cr7X = cw * 0.36 + stageProgress * (cw * 0.14);
+                if (stageProgress < 0.28) {
+                    drawIntroCR7(cr7X, ch * 0.68, 1.22, 'run');
+                } else {
+                    const jumpProg = (stageProgress - 0.28) / 0.72;
+                    const jumpY = ch * 0.68 - Math.sin(jumpProg * Math.PI) * 170;
+                    drawIntroCR7(cr7X, jumpY, 1.28, 'jump', jumpProg * Math.PI * 2);
+                    if (jumpProg >= 0.94 && introShockwaves.length === 0) {
+                        addIntroLandingShockwave(cw * 0.5, ch * 0.68);
+                        if (!introHasPlayedAudio) {
+                            introHasPlayedAudio = true;
+                            if (siuuAudio) { siuuAudio.currentTime = 0; siuuAudio.play().catch(() => {}); }
+                        }
+                    }
+                }
+            } else if (cycle < 5.3) {
+                const cr7X = cw * 0.5, cr7Y = ch * 0.68;
+                if (introShockwaves.length === 0 && cycle < 4.0) addIntroLandingShockwave(cr7X, cr7Y);
+                drawIntroCR7(cr7X, cr7Y, 1.35, 'siuu');
+
+                introCtx.save();
+                introCtx.textAlign = 'center';
+                introCtx.font = '900 68px Outfit';
+                introCtx.shadowColor = '#ffd15c';
+                introCtx.shadowBlur = 35;
+                introCtx.fillStyle = '#ffffff';
+                introCtx.strokeStyle = '#ffd15c';
+                introCtx.lineWidth = 4;
+                introCtx.strokeText('SIUUU! ⚽', cr7X, ch * 0.3);
+                introCtx.fillText('SIUUU! ⚽', cr7X, ch * 0.3);
+                introCtx.restore();
+            } else {
+                finishIntro();
+                return;
+            }
+            introAnimationId = requestAnimationFrame(animateIntro);
+        }
+        introAnimationId = requestAnimationFrame(animateIntro);
+
+        function finishIntro() {
+            introFinished = true;
+            if (introAnimationId) cancelAnimationFrame(introAnimationId);
+            introOverlay.classList.add('fade-out');
+            mainWrapper.classList.add('visible');
+            if (fixedScrollIndicator) {
+                setTimeout(() => { fixedScrollIndicator.classList.remove('hidden'); }, 400);
+            }
+        }
+
+        function replayIntro() {
+            stopAllSounds();
+            introFinished = false;
+            introAnimTime = 0;
+            introLastTimestamp = performance.now();
+            introHasPlayedAudio = false;
+            introParticles = [];
+            introShockwaves = [];
+            introNetBulge = 0;
+
+            if (fixedScrollIndicator) fixedScrollIndicator.classList.add('hidden');
+            introOverlay.classList.remove('fade-out');
+            mainWrapper.classList.remove('visible');
+
+            resizeIntro();
+            introAnimationId = requestAnimationFrame(animateIntro);
+        }
+
+        function scrollToLetter() {
+            const letterSection = document.getElementById('letterSection');
+            if (letterSection) letterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!fixedScrollIndicator || !mainWrapper.classList.contains('visible')) return;
+            if (window.scrollY > 200) fixedScrollIndicator.classList.add('hidden');
+            else fixedScrollIndicator.classList.remove('hidden');
+        });
+
+        // ================= 2. WEATHER & FLARES ARENA ENGINE =================
+        const weatherCanvas = document.getElementById('weatherCanvas');
+        const wCtx = weatherCanvas.getContext('2d');
+        let currentWeatherMode = 'day';
+
+        let rainDrops = [];
+        let stadiumFlares = [];
+        let confettiList = [];
+        let arenaBall = { x: 450, y: 380, vx: 0, vy: 0, active: false };
+
+        for (let i = 0; i < 110; i++) {
+            rainDrops.push({
+                x: Math.random() * 900,
+                y: Math.random() * 506,
+                length: 12 + Math.random() * 14,
+                speed: 14 + Math.random() * 8
+            });
+        }
+
+        function setWeatherMode(mode) {
+            currentWeatherMode = mode;
+            document.querySelectorAll('.weather-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('mode-' + mode);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (mode === 'flare') {
+                triggerFlares();
+            }
+        }
+
+        function triggerFlares() {
+            for (let i = 0; i < 70; i++) {
+                stadiumFlares.push({
+                    x: Math.random() < 0.5 ? Math.random() * 180 : 720 + Math.random() * 180,
+                    y: 120 + Math.random() * 100,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: -Math.random() * 6 - 2,
+                    color: Math.random() > 0.5 ? '#f43f5e' : '#ffd15c',
+                    size: 4 + Math.random() * 6,
+                    alpha: 1
+                });
+            }
+            for (let i = 0; i < 60; i++) {
+                confettiList.push({
+                    x: Math.random() * 900,
+                    y: -20,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: 2 + Math.random() * 4,
+                    rot: Math.random() * Math.PI,
+                    color: ['#f43f5e', '#ffd15c', '#38bdf8', '#a855f7', '#10b981'][Math.floor(Math.random() * 5)],
+                    w: 8 + Math.random() * 6,
+                    h: 5 + Math.random() * 4
+                });
+            }
+        }
+
+        function triggerArenaShot() {
+            arenaBall.x = 450;
+            arenaBall.y = 400;
+            arenaBall.vx = 7.5;
+            arenaBall.vy = -6.8;
+            arenaBall.active = true;
+            triggerFlares();
+            playSound('win.mp3', 'btn-sound-win', '⚡ CR7 SIUUU & Sút Lưới');
+        }
+
+        function renderWeatherArena() {
+            wCtx.clearRect(0, 0, 900, 506);
+
+            // Pitch Background based on Mode
+            if (currentWeatherMode === 'day') {
+                const g = wCtx.createLinearGradient(0, 0, 0, 506);
+                g.addColorStop(0, '#1b5e34'); g.addColorStop(1, '#2e7d32');
+                wCtx.fillStyle = g;
+            } else if (currentWeatherMode === 'night') {
+                const g = wCtx.createLinearGradient(0, 0, 0, 506);
+                g.addColorStop(0, '#0a2318'); g.addColorStop(1, '#113e25');
+                wCtx.fillStyle = g;
+            } else if (currentWeatherMode === 'rain') {
+                const g = wCtx.createLinearGradient(0, 0, 0, 506);
+                g.addColorStop(0, '#0f2f21'); g.addColorStop(1, '#16422f');
+                wCtx.fillStyle = g;
+            } else { // Flare Championship
+                const g = wCtx.createLinearGradient(0, 0, 0, 506);
+                g.addColorStop(0, '#2e0f19'); g.addColorStop(1, '#1c452e');
+                wCtx.fillStyle = g;
+            }
+            wCtx.fillRect(0, 0, 900, 506);
+
+            // Stadium Floodlights in Night / Flare mode
+            if (currentWeatherMode === 'night' || currentWeatherMode === 'flare') {
+                wCtx.save();
+                wCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                wCtx.beginPath();
+                wCtx.moveTo(100, 0); wCtx.lineTo(0, 506); wCtx.lineTo(400, 506); wCtx.closePath(); wCtx.fill();
+                wCtx.beginPath();
+                wCtx.moveTo(800, 0); wCtx.lineTo(500, 506); wCtx.lineTo(900, 506); wCtx.closePath(); wCtx.fill();
+                wCtx.restore();
+            }
+
+            // Field Lines & Goal Post
+            wCtx.save();
+            wCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            wCtx.lineWidth = 3;
+            wCtx.strokeRect(80, 120, 740, 360);
+
+            // Goal
+            wCtx.strokeStyle = '#ffffff';
+            wCtx.lineWidth = 7;
+            wCtx.strokeRect(700, 160, 110, 180);
+            wCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            wCtx.fillRect(700, 160, 110, 180);
+            wCtx.restore();
+
+            // Rain Effect
+            if (currentWeatherMode === 'rain') {
+                wCtx.save();
+                wCtx.strokeStyle = 'rgba(180, 220, 255, 0.55)';
+                wCtx.lineWidth = 1.6;
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const r = rainDrops[i];
+                    wCtx.beginPath();
+                    wCtx.moveTo(r.x, r.y);
+                    wCtx.lineTo(r.x - 4, r.y + r.length);
+                    wCtx.stroke();
+                    r.y += r.speed;
+                    r.x -= 1.5;
+                    if (r.y > 506) {
+                        r.y = -10;
+                        r.x = Math.random() * 900;
+                    }
+                }
+                wCtx.restore();
+            }
+
+            // Flares Smoke & Sparks
+            for (let i = stadiumFlares.length - 1; i >= 0; i--) {
+                const f = stadiumFlares[i];
+                f.x += f.vx; f.y += f.vy; f.alpha -= 0.015;
+                if (f.alpha <= 0) { stadiumFlares.splice(i, 1); continue; }
+                wCtx.save();
+                wCtx.globalAlpha = Math.max(0, f.alpha);
+                wCtx.fillStyle = f.color;
+                wCtx.shadowColor = f.color;
+                wCtx.shadowBlur = 15;
+                wCtx.beginPath();
+                wCtx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+                wCtx.fill();
+                wCtx.restore();
+            }
+
+            // Confetti
+            for (let i = confettiList.length - 1; i >= 0; i--) {
+                const c = confettiList[i];
+                c.y += c.vy; c.x += c.vx; c.rot += 0.05;
+                if (c.y > 510) { confettiList.splice(i, 1); continue; }
+                wCtx.save();
+                wCtx.translate(c.x, c.y);
+                wCtx.rotate(c.rot);
+                wCtx.fillStyle = c.color;
+                wCtx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+                wCtx.restore();
+            }
+
+            // Ball Flight
+            if (arenaBall.active) {
+                arenaBall.x += arenaBall.vx;
+                arenaBall.y += arenaBall.vy;
+                if (arenaBall.x >= 735) {
+                    arenaBall.active = false;
+                }
+            }
+
+            wCtx.save();
+            wCtx.translate(arenaBall.x, arenaBall.y);
+            wCtx.fillStyle = '#ffffff';
+            wCtx.beginPath(); wCtx.arc(0, 0, 11, 0, Math.PI * 2); wCtx.fill();
+            wCtx.strokeStyle = '#111'; wCtx.lineWidth = 2; wCtx.stroke();
+            wCtx.restore();
+
+            requestAnimationFrame(renderWeatherArena);
+        }
+        renderWeatherArena();
+
+        // ================= 3. MEMORY WALL & GUESTBOOK SYSTEM =================
+        const defaultWishes = [
+            {
+                id: 1,
+                author: "Tuấn Hưng (12A3 - THPT Chu Văn An)",
+                avatar: "👑",
+                category: "wish",
+                content: "Em mong game ra mắt phiên bản V2 có chế độ 1v1 PvP thời gian thực để thách đấu bạn cùng lớp và thêm skill Powershot cho CR7!",
+                time: "2 giờ trước",
+                likes: 24
+            },
+            {
+                id: 2,
+                author: "Minh Anh (CLB Lập Trình Python)",
+                avatar: "🐐",
+                category: "love",
+                content: "Cảm ơn thầy cô và đội ngũ phát triển! Nhờ game sút penalty này mà em từ một học sinh sợ hàm def và dict trở nên cực kỳ yêu thích Python ❤️",
+                time: "5 giờ trước",
+                likes: 38
+            },
+            {
+                id: 3,
+                author: "Tộc Viên Mixi Gaming (Hà Nội)",
+                avatar: "🍗",
+                category: "idea",
+                content: "Ý tưởng tuyệt vời: Hãy cho thêm skill Khô Gà Đè Tem của anh Độ giúp hồi tim và thêm hiệu ứng pháo sáng khán đài khi vào chung kết!",
+                time: "Hôm qua",
+                likes: 19
+            },
+            {
+                id: 4,
+                author: "Hoàng Long (Nam Định)",
+                avatar: "🦅",
+                category: "quiz",
+                content: "Đóng góp ý tưởng câu hỏi Module nâng cao: Xử lý chuỗi Regex và thuật toán sắp xếp mảng kết hợp giải cứu thủ môn Onana ⚽",
+                time: "2 ngày trước",
+                likes: 15
+            }
+        ];
+
+        let currentWishes = [];
+        let activeCategoryFilter = 'all';
+
+        function loadWishes() {
+            const saved = localStorage.getItem('penalty_master_wishes');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    currentWishes = [...parsed, ...defaultWishes.filter(dw => !parsed.some(p => p.id === dw.id))];
+                } catch (e) {
+                    currentWishes = [...defaultWishes];
+                }
+            } else {
+                currentWishes = [...defaultWishes];
+            }
+            renderWishes();
+        }
+
+        function renderWishes() {
+            const container = document.getElementById('wishesContainer');
+            if (!container) return;
+
+            const filtered = activeCategoryFilter === 'all' 
+                ? currentWishes 
+                : currentWishes.filter(w => w.category === activeCategoryFilter);
+
+            document.getElementById('count-all').innerText = currentWishes.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-sub); padding: 30px;">Chưa có lời nhắn nào trong danh mục này. Hãy là người đầu tiên gửi nhé! ✨</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(w => {
+                let badgeClass = 'badge-wish', badgeLabel = '🚀 Mong muốn V2';
+                if (w.category === 'love') { badgeClass = 'badge-love'; badgeLabel = '❤️ Lời chúc'; }
+                else if (w.category === 'idea') { badgeClass = 'badge-idea'; badgeLabel = '💡 Góp ý'; }
+                else if (w.category === 'quiz') { badgeClass = 'badge-quiz'; badgeLabel = '🐍 Python Quiz'; }
+
+                return `
+                    <div class="wish-card">
+                        <div>
+                            <div class="wish-header">
+                                <div class="wish-author-info">
+                                    <div class="wish-avatar">${w.avatar || '⚽'}</div>
+                                    <div>
+                                        <div class="wish-name">${w.author}</div>
+                                        <div class="wish-time">${w.time || 'Vừa xong'}</div>
+                                    </div>
+                                </div>
+                                <span class="wish-badge ${badgeClass}">${badgeLabel}</span>
+                            </div>
+                            <div class="wish-text">“${w.content}”</div>
+                        </div>
+                        <div class="wish-footer">
+                            <span style="font-size:0.75rem; color:var(--text-sub);">Penalty Master Archive</span>
+                            <button class="like-btn" onclick="likeWish(${w.id})">
+                                <span>❤️</span>
+                                <span id="like-count-${w.id}">${w.likes || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterWishes(cat) {
+            activeCategoryFilter = cat;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderWishes();
+        }
+
+        async function submitWish() {
+            const author = document.getElementById('wishAuthor').value.trim();
+            const avatar = document.getElementById('wishAvatar').value;
+            const category = document.getElementById('wishCategory').value;
+            const content = document.getElementById('wishContent').value.trim();
+
+            if (!author || !content) {
+                alert('Vui lòng nhập Tên của bạn và Lời nhắn lưu bút nhé! ✨');
+                return;
+            }
+
+            const newWish = {
+                id: Date.now(),
+                author: author,
+                avatar: avatar,
+                category: category,
+                content: content,
+                time: 'Vừa xong',
+                likes: 1
+            };
+
+            currentWishes.unshift(newWish);
+            localStorage.setItem('penalty_master_wishes', JSON.stringify(currentWishes));
+
+            // Sync with Supabase table if available
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('guestbook').insert([{
+                        author: author,
+                        avatar: avatar,
+                        category: category,
+                        content: content
+                    }]);
+                } catch (e) {
+                    console.log("Supabase sync:", e);
+                }
+            }
+
+            document.getElementById('wishAuthor').value = '';
+            document.getElementById('wishContent').value = '';
+            renderWishes();
+            alert('Cảm ơn bạn! Lời nhắn lưu bút quý giá của bạn đã được lưu lại thành công! 🎉');
+        }
+
+        function likeWish(id) {
+            const target = currentWishes.find(w => w.id === id);
+            if (target) {
+                target.likes = (target.likes || 0) + 1;
+                const el = document.getElementById(`like-count-${id}`);
+                if (el) el.innerText = target.likes;
+                localStorage.setItem('penalty_master_wishes', JSON.stringify(currentWishes));
+            }
+        }
+
+        loadWishes();
+
+        // ================= 4. SOUNDBOARD AUDIO CONTROLLER =================
+        let currentAudio = null;
+        let currentBtnId = null;
+        const statusText = document.getElementById('playingStatusText');
+        const soundEq = document.getElementById('soundEq');
+
+        function playSound(file, btnId, title) {
+            if (currentAudio && currentBtnId === btnId) {
+                stopAllSounds();
+                return;
+            }
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+
+            document.querySelectorAll('.sound-btn').forEach(btn => btn.classList.remove('playing'));
+
+            const audioPath = 'music/' + file;
+            currentAudio = new Audio(audioPath);
+            currentBtnId = btnId;
+
+            const targetBtn = document.getElementById(btnId);
+            if (targetBtn) {
+                targetBtn.classList.add('playing');
+            }
+
+            if (soundEq) soundEq.style.display = 'inline-flex';
+            if (statusText) statusText.innerHTML = `Đang phát: <strong>${title}</strong>`;
+
+            currentAudio.play().catch(e => {
+                console.log('Playback error:', e);
+                if (statusText) statusText.innerText = 'Không thể phát âm thanh này.';
+            });
+
+            currentAudio.onended = () => {
+                if (targetBtn) targetBtn.classList.remove('playing');
+                if (soundEq) soundEq.style.display = 'none';
+                if (statusText) statusText.innerText = 'Đã phát xong: ' + title;
+                currentAudio = null;
+                currentBtnId = null;
+            };
+        }
+
+        function stopAllSounds() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (currentBtnId) {
+                const prevBtn = document.getElementById(currentBtnId);
+                if (prevBtn) prevBtn.classList.remove('playing');
+                currentBtnId = null;
+            }
+            if (soundEq) soundEq.style.display = 'none';
+            if (statusText) statusText.innerText = 'Đã dừng tất cả âm thanh.';
+        }
+    </script>
+</body>
+
+</html>
