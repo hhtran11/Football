@@ -240,6 +240,20 @@ for (let i = 0; i < 60; i++) {
     });
 }
 
+let ambientAnimId = null;
+function startAmbientAnimation() {
+    if (ambientAnimId) return;
+    function loop() {
+        if (gameStarted && !shooting) {
+            if (gameWeather === 'rain' || gameWeather === 'flare' || gameFlares.length > 0 || gameConfetti.length > 0) {
+                render();
+            }
+        }
+        ambientAnimId = requestAnimationFrame(loop);
+    }
+    ambientAnimId = requestAnimationFrame(loop);
+}
+
 function setGameWeather(mode) {
     gameWeather = mode;
     document.querySelectorAll('.weather-pill').forEach(p => p.classList.remove('active'));
@@ -249,6 +263,10 @@ function setGameWeather(mode) {
     if (mode === 'flare') {
         triggerGameFlares();
     }
+    
+    // Lập tức hiển thị hiệu ứng thời tiết lên sân cỏ mà không cần chờ sút
+    render();
+    startAmbientAnimation();
 }
 
 function triggerGameFlares() {
@@ -1629,6 +1647,7 @@ function startGame() {
     document.getElementById('welcomeScreen').style.display = 'none';
     document.getElementById('gameContainer').style.display = 'flex';
     setupAntiCheat();
+    startAmbientAnimation();
     initGame();
 }
 
