@@ -1348,15 +1348,27 @@ function showAntiCheatNotice(msg) {
 
 let pendingPenaltyNextAction = null;
 
-function showPenaltyModal(title, message, onAcknowledge) {
+function showPenaltyModal(title, message, onAcknowledge, icon = "💔", btnText = "EM ĐÃ RÕ ⚽") {
     stopQuestionTimer();
 
     const modal = document.getElementById('penaltyModal');
     const titleElem = document.getElementById('penaltyTitle');
     const msgElem = document.getElementById('penaltyMessage');
+    const iconElem = document.getElementById('penaltyIcon');
+    const btnElem = document.getElementById('penaltyBtn');
 
-    if (titleElem) titleElem.innerText = title;
+    if (titleElem) {
+        titleElem.innerText = title;
+        titleElem.style.color = (icon === "⚠️" || icon === "⏱️" || icon === "🛡️") ? "#e67e22" : "#e74c3c";
+    }
     if (msgElem) msgElem.innerHTML = message;
+    if (iconElem) iconElem.innerText = icon;
+    if (btnElem) {
+        btnElem.innerText = btnText;
+        btnElem.style.background = (icon === "⚠️" || icon === "⏱️" || icon === "🛡️")
+            ? "linear-gradient(135deg, #e67e22, #d35400)"
+            : "linear-gradient(135deg, #e74c3c, #c0392b)";
+    }
 
     pendingPenaltyNextAction = onAcknowledge;
 
@@ -1374,64 +1386,50 @@ function acknowledgePenalty() {
     }
 }
 
+function resumeQuestionTimer() {
+    stopQuestionTimer();
+    if (!gameStarted || shooting || isQuestionAnswered || currentQuestion >= 10 || lives <= 0) return;
+
+    updateTimerUI();
+
+    questionTimerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+
+        if (timeLeft <= 0) {
+            stopQuestionTimer();
+            handleTimeOut();
+        }
+    }, 1000);
+}
+
 function triggerTabSwitchPenalty(reason) {
     if (!gameStarted || shooting || currentQuestion >= 10 || lives <= 0) return;
     if (isQuestionAnswered) return;
 
+    // Không bật đè nếu modal cảnh báo đang mở
+    const modal = document.getElementById('penaltyModal');
+    if (modal && modal.style.display === 'flex') return;
+
     if (tabSwitchPenalized) return;
     tabSwitchPenalized = true;
-    setTimeout(() => { tabSwitchPenalized = false; }, 2500);
+    setTimeout(() => { tabSwitchPenalized = false; }, 3000);
 
+    // Tạm dừng timer của câu hỏi để học sinh đọc cảnh báo mà không bị mất thời gian
     stopQuestionTimer();
 
-    const optsContainer = document.getElementById('optsContainer');
-    const answerInput = document.getElementById('answer');
-    const submitBtn = document.getElementById('submitBtn');
-    const directionBox = document.getElementById('directionBox');
-    if (optsContainer) optsContainer.style.display = 'none';
-    if (answerInput) answerInput.style.display = 'none';
-    if (submitBtn) submitBtn.style.display = 'none';
-    if (directionBox) directionBox.style.display = 'none';
-
-    if (vvdShieldActive) {
-        vvdShieldActive = false;
-        showPenaltyModal(
-            "🛡️ LÁ CHẮN THÉP VAN DIJK ĐÃ KÍCH HOẠT!",
-            `<b>Lá chắn Đội trưởng của Virgil Van Dijk</b> đã bảo vệ bạn! Bạn không bị trừ tim trong lần vi phạm/chuyển tab này. Hãy tập trung làm bài nhé!`,
-            () => {}
-        );
-        return;
-    }
-
-    const isDead = handleLifeLoss();
-
-    const q = activeQuestions[currentQuestion];
-    let correctSolutionHtml = '';
-    if (q) {
-        if (q.type === 'mcq') {
-            correctSolutionHtml = `<div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #27ae60;">
-                <b>✅ Đáp án đúng của câu này l\u00e0:</b> <span style="font-weight: 700;">${q.opts[q.ans]}</span>
-            </div>`;
-        } else {
-            correctSolutionHtml = `<div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #2c3e50;">
-                <b>\uD83D\uDCA1 G\u1ee3i \u00fd m\u1eabu code \u0111\u00fang:</b> <code style="background: #fff; padding: 3px 8px; border-radius: 4px; color: #c0392b; font-weight: 700; font-family: monospace;">${q.h}</code>
-            </div>`;
-        }
-    }
-
     showPenaltyModal(
-        "⚠️ TH\u00d4NG B\u00c1O B\u1eca TR\u1eea TIM (VI PH\u1EA0M GIAN L\u1EACN)",
-        `<b>❌ L\u1ed7i vi ph\u1EA1m:</b> ${reason}.<br>B\u1EA1n b\u1ECB <b>tr\u1EEB 1 tim ❤️</b> v\u00e0 m\u1EA5t l\u01B0\u1EE3t s\u00fat n\u00e0y!
-        <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 10px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.9rem; color: #7f8c8d;">
-            <b>👉 Thao t\u00e1c \u0111\u00fang:</b> M\u1edf to\u00e0n m\u00e0n h\u00ecnh game, gi\u1eef con tr\u1ecf chu\u1ed9t t\u1EADp trung trong c\u1eeda s\u1ed5 v\u00e0 kh\u00f4ng nh\u1ea5p chu\u1ed9t/chuy\u1ec3n tab sang \u1ee9ng d\u1ee5ng kh\u00e1c hay d\u00f9ng ph\u00edm ch\u1ee5p m\u00e0n h\u00ecnh (Win+Shift+S).
-        </div>
-        ${correctSolutionHtml}`,
+        "⚠️ CẢNH BÁO NHẮC NHỞ TẬP TRUNG!",
+        `<b>Phát hiện:</b> ${reason}.<br><br>
+        <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 14px; margin: 10px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #7f8c8d;">
+            <b>👉 Nhắc nhở:</b> Bạn <b>không bị trừ điểm hay trừ tim ❤️</b>. Hãy giữ tập trung toàn màn hình vào cửa sổ game để rèn luyện tính trung thực và hoàn thành bài thi tốt nhất nhé!
+        </div>`,
         () => {
-            if (!isDead) {
-                currentQuestion++;
-                showQuestion();
-            }
-        }
+            // Khi nhấn nút: Cho học sinh tiếp tục làm câu hỏi hiện tại, tiếp tục đếm ngược thời gian
+            resumeQuestionTimer();
+        },
+        "⚠️",
+        "TIẾP TỤC LÀM BÀI ⚽"
     );
 }
 
@@ -1765,6 +1763,25 @@ function checkMCQ(idx) {
     } else {
         stopQuestionTimer();
         document.getElementById('optsContainer').style.display = 'none';
+
+        if (vvdShieldActive) {
+            vvdShieldActive = false;
+            showPenaltyModal(
+                "🛡️ LÁ CHẮN THÉP VAN DIJK ĐÃ BẢO VỆ BẠN!",
+                `<b>Lá chắn Đội trưởng của Virgil Van Dijk</b> đã bảo vệ bạn! Bạn đã chọn sai nhưng được khiên chắn chặn việc trừ tim.
+                <div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 12px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #27ae60;">
+                    <b>✅ Đáp án chính xác là:</b> <span style="font-weight: 800;">${q.opts[q.ans]}</span>
+                </div>`,
+                () => {
+                    currentQuestion++;
+                    showQuestion();
+                },
+                "🛡️",
+                "TIẾP TỤC ⚽"
+            );
+            return;
+        }
+
         const isDead = handleLifeLoss();
 
         showPenaltyModal(
@@ -1781,7 +1798,9 @@ function checkMCQ(idx) {
                     currentQuestion++;
                     showQuestion();
                 }
-            }
+            },
+            "💔",
+            "EM ĐÃ RÕ ⚽"
         );
     }
 }
@@ -1810,6 +1829,25 @@ function submitAnswer() {
         stopQuestionTimer();
         document.getElementById('answer').style.display = 'none';
         document.getElementById('submitBtn').style.display = 'none';
+
+        if (vvdShieldActive) {
+            vvdShieldActive = false;
+            showPenaltyModal(
+                "🛡️ LÁ CHẮN THÉP VAN DIJK ĐÃ BẢO VỆ BẠN!",
+                `<b>Lá chắn Đội trưởng của Virgil Van Dijk</b> đã bảo vệ bạn! Cú pháp code chưa đúng nhưng được khiên chắn chặn việc trừ tim.
+                <div style="background: #e8f8f5; border-left: 4px solid #2ecc71; padding: 10px 14px; margin: 12px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; color: #2c3e50;">
+                    <b>💡 Gợi ý mẫu code đúng:</b> <code style="background: #fff; padding: 3px 8px; border-radius: 4px; color: #c0392b; font-weight: 700; font-family: monospace;">${q.h}</code>
+                </div>`,
+                () => {
+                    currentQuestion++;
+                    showQuestion();
+                },
+                "🛡️",
+                "TIẾP TỤC ⚽"
+            );
+            return;
+        }
+
         const isDead = handleLifeLoss();
 
         showPenaltyModal(
